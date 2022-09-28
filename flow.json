@@ -16,6 +16,14 @@
         "env": []
     },
     {
+        "id": "790c4063f20b5b89",
+        "type": "tab",
+        "label": "MES NODES7",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
         "id": "6c99a5d579fc4f92",
         "type": "subflow",
         "name": "dadosIniciaisEventosVariaveis.json",
@@ -95,33 +103,6 @@
         "useselfsignedcertificate": false,
         "sslterminated": false,
         "verboselogging": false
-    },
-    {
-        "id": "3b9e71b261a6c844",
-        "type": "modbus-client",
-        "name": "",
-        "clienttype": "tcp",
-        "bufferCommands": true,
-        "stateLogEnabled": false,
-        "queueLogEnabled": false,
-        "failureLogEnabled": true,
-        "tcpHost": "10.255.2.129",
-        "tcpPort": "502",
-        "tcpType": "DEFAULT",
-        "serialPort": "/dev/ttyUSB",
-        "serialType": "RTU-BUFFERD",
-        "serialBaudrate": "9600",
-        "serialDatabits": "8",
-        "serialStopbits": "1",
-        "serialParity": "none",
-        "serialConnectionDelay": "100",
-        "serialAsciiResponseStartDelimiter": "0x3A",
-        "unit_id": "1",
-        "commandDelay": "10",
-        "clientTimeout": "1000",
-        "reconnectOnTimeout": true,
-        "reconnectTimeout": "2000",
-        "parallelUnitIdsAllowed": true
     },
     {
         "id": "3ad5208346cc717c",
@@ -328,7 +309,7 @@
         "type": "function",
         "z": "2bd946178564ad2e",
         "name": "Atribui variaveis para dadosIniciais.json",
-        "func": "// Definiçoes das variaveis a serem lidas\nvar Fc = [];\nvar Address = [];\nvar Quantity = [];\nvar Unitid = [];\nvar Host = [];\nvar Porta = [];\nvar TipConexao = [];\nvar TipUnidadePeriodo = [];\nvar ValPeriodo = [];\nvar CodVariavelLeitura = [];\nvar DataVariavelLeituraHora = [];\nvar DataVariavelLeituraDia = [];\nvar DataAtualHora = [];\nvar TipVariavelLeitura = [];\n\n    for(let pos in msg.payload[0].ListaMonitoraGruposPeriodicos)\n    {\n        Fc.push(msg.payload[0].ListaMonitoraGruposPeriodicos[pos].Fc);\n        Address.push(msg.payload[0].ListaMonitoraGruposPeriodicos[pos].Address);\n        Quantity.push(msg.payload[0].ListaMonitoraGruposPeriodicos[pos].Quantity);\n        Unitid.push(msg.payload[0].ListaMonitoraGruposPeriodicos[pos].Unitid);\n        Host.push(msg.payload[0].ListaMonitoraGruposPeriodicos[pos].Host);\n        Porta.push(msg.payload[0].ListaMonitoraGruposPeriodicos[pos].Porta);\n        TipConexao.push(msg.payload[0].ListaMonitoraGruposPeriodicos[pos].TipConexao);\n        TipUnidadePeriodo.push(msg.payload[0].ListaMonitoraGruposPeriodicos[pos].TipUnidadePeriodo);\n        ValPeriodo.push(msg.payload[0].ListaMonitoraGruposPeriodicos[pos].ValPeriodo);\n        CodVariavelLeitura.push(msg.payload[0].ListaMonitoraGruposPeriodicos[pos].CodVariavelLeitura);\n        TipVariavelLeitura.push(msg.payload[0].ListaMonitoraGruposPeriodicos[pos].TipVariavelLeitura);\n        DataVariavelLeituraHora.push(msg.payload[0].ListaMonitoraGruposPeriodicos[pos].DataVariavelLeituraHora);\n        DataVariavelLeituraDia.push(msg.payload[0].ListaMonitoraGruposPeriodicos[pos].DataVariavelLeituraDia);\n        DataAtualHora.push(msg.payload[0].ListaMonitoraGruposPeriodicos[pos].DataAtualHora);\n    }\n\nglobal.set(\"Host\", Host);\nglobal.set(\"Porta\", Porta);\nglobal.set(\"TipConexao\", TipConexao);\nglobal.set(\"Fc\", Fc);\nglobal.set(\"Address\", Address);\nglobal.set(\"Quantity\", Quantity);\nglobal.set(\"Unitid\", Unitid);\nglobal.set(\"TipUnidadePeriodo\", TipUnidadePeriodo);\nglobal.set(\"ValPeriodo\", ValPeriodo);\nglobal.set(\"CodVarDI\", CodVariavelLeitura);\nglobal.set(\"DataVariavelLeituraHora\", DataVariavelLeituraHora);\nglobal.set(\"DataVariavelLeituraDiaAntiga\", DataVariavelLeituraDia);\nglobal.set(\"DataAtualHora\", DataAtualHora);\nglobal.set(\"TipVariavelLeitura\", TipVariavelLeitura);",
+        "func": "// Definiçoes das variaveis a serem lidas\n// MODBUS\nvar Fc = [];\nvar Address = [];\nvar Quantity = [];\nvar Unitid = [];\n// SIEMENS TCP\nvar Rack = [];\nvar Slot = [];\nvar Data = [];\n// HOST\nvar Host = [];\nvar Porta = [];\nvar TipConexao = [];\nvar TipUnidadePeriodo = [];\nvar ValPeriodo = [];\nvar CodVariavelLeitura = [];\nvar DataVariavelLeituraHora = [];\nvar DataVariavelLeituraDia = [];\nvar DataAtualHora = [];\nvar TipVariavelLeitura = [];\n\n    for(let pos in msg.payload[0].ListaMonitoraGruposPeriodicos)\n    {\n        // MODBUS\n        Fc.push(msg.payload[0].ListaMonitoraGruposPeriodicos[pos].Fc);\n        Address.push(msg.payload[0].ListaMonitoraGruposPeriodicos[pos].Address);\n        Quantity.push(msg.payload[0].ListaMonitoraGruposPeriodicos[pos].Quantity);\n        Unitid.push(msg.payload[0].ListaMonitoraGruposPeriodicos[pos].Unitid);\n        // SIEMENS TCP\n        Rack.push(msg.payload[0].ListaMonitoraGruposPeriodicos[pos].Rack);\n        Slot.push(msg.payload[0].ListaMonitoraGruposPeriodicos[pos].Slot);\n        Data.push(msg.payload[0].ListaMonitoraGruposPeriodicos[pos].Data);\n        // HOST\n        Host.push(msg.payload[0].ListaMonitoraGruposPeriodicos[pos].Host);\n        Porta.push(msg.payload[0].ListaMonitoraGruposPeriodicos[pos].Porta);\n        TipConexao.push(msg.payload[0].ListaMonitoraGruposPeriodicos[pos].TipConexao);\n        TipUnidadePeriodo.push(msg.payload[0].ListaMonitoraGruposPeriodicos[pos].TipUnidadePeriodo);\n        ValPeriodo.push(msg.payload[0].ListaMonitoraGruposPeriodicos[pos].ValPeriodo);\n        CodVariavelLeitura.push(msg.payload[0].ListaMonitoraGruposPeriodicos[pos].CodVariavelLeitura);\n        TipVariavelLeitura.push(msg.payload[0].ListaMonitoraGruposPeriodicos[pos].TipVariavelLeitura);\n        DataVariavelLeituraHora.push(msg.payload[0].ListaMonitoraGruposPeriodicos[pos].DataVariavelLeituraHora);\n        DataVariavelLeituraDia.push(msg.payload[0].ListaMonitoraGruposPeriodicos[pos].DataVariavelLeituraDia);\n        DataAtualHora.push(msg.payload[0].ListaMonitoraGruposPeriodicos[pos].DataAtualHora);\n    }\n\nglobal.set(\"Host\", Host);\nglobal.set(\"Porta\", Porta);\nglobal.set(\"TipConexao\", TipConexao);\nglobal.set(\"Fc\", Fc);\nglobal.set(\"Address\", Address);\nglobal.set(\"Quantity\", Quantity);\nglobal.set(\"Unitid\", Unitid);\nglobal.set(\"Rack\", Rack);\nglobal.set(\"Slot\", Slot);\nglobal.set(\"Data\", Data);\nglobal.set(\"TipUnidadePeriodo\", TipUnidadePeriodo);\nglobal.set(\"ValPeriodo\", ValPeriodo);\nglobal.set(\"CodVarDI\", CodVariavelLeitura);\nglobal.set(\"DataVariavelLeituraHora\", DataVariavelLeituraHora);\nglobal.set(\"DataVariavelLeituraDiaAntiga\", DataVariavelLeituraDia);\nglobal.set(\"DataAtualHora\", DataAtualHora);\nglobal.set(\"TipVariavelLeitura\", TipVariavelLeitura);",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -479,7 +460,7 @@
         "showStatusActivities": false,
         "showErrors": false,
         "logIOActivities": false,
-        "server": "3b9e71b261a6c844",
+        "server": "",
         "useIOFile": false,
         "ioFile": "",
         "useIOForPayload": false,
@@ -892,7 +873,8 @@
         "name": "link out 1",
         "mode": "link",
         "links": [
-            "66db81cb3fd6ab48"
+            "66db81cb3fd6ab48",
+            "68f8d3f2644e7547"
         ],
         "x": 735,
         "y": 400,
@@ -921,7 +903,8 @@
         "name": "link out 2",
         "mode": "link",
         "links": [
-            "a54b08c022bf964c"
+            "a54b08c022bf964c",
+            "0698d6203a73f2bd"
         ],
         "x": 625,
         "y": 520,
@@ -1133,7 +1116,8 @@
         "z": "f8a25b208ccc25c0",
         "name": "link in 2",
         "links": [
-            "fa4a58f46c09d61c"
+            "fa4a58f46c09d61c",
+            "9e26058fcf1a4f5a"
         ],
         "x": 55,
         "y": 660,
@@ -1828,5 +1812,503 @@
                 "86e7c1d3b0f45ff3"
             ]
         ]
+    },
+    {
+        "id": "13b730713b78c902",
+        "type": "inject",
+        "z": "790c4063f20b5b89",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "2",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "15",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 130,
+        "y": 140,
+        "wires": [
+            [
+                "3cbfa175bd61f36e"
+            ]
+        ]
+    },
+    {
+        "id": "3cbfa175bd61f36e",
+        "type": "function",
+        "z": "790c4063f20b5b89",
+        "name": "Parametros",
+        "func": "// dadosIniciaisEventosVariaveis.json\nvar CodVarEvento = global.get('CodVarEvento');\nvar posEventos = [];\nvar pos = [];\n// dadosIniciais.json\nvar Host = global.get('Host');\nvar Porta = global.get('Porta');\nvar TipConexao = global.get('TipConexao');\nvar Rack = global.get('Rack');\nvar Slot = global.get('Slot');\nvar Data = global.get('Data');\nvar CodVarDI = global.get('CodVarDI');\nvar TipVariavelLeitura = global.get('TipVariavelLeitura');\n// Variavel de verificaçao\nlet aguarda2 = flow.get('aguarda2');\nlet posIgnore = global.get('posIgnore');\nlet reset = flow.get('reset');\n\nfor (let i in TipConexao) \n{\n    if (TipConexao[i] == \"SIEMENS\") \n    {\n        if (CodVarDI[i] == CodVarEvento[i])\n        {\n            if (!posIgnore.includes(i)) \n            {\n                posEventos.push(i);\n            }\n        }\n    }\n}\n\nlet ins = {};\nlet key = 0;\n\nif(pos != null)\n{\n    for(let i in posEventos)\n    {\n        ins[i] =\n            [{\n                \"delta\": key,\n                \"name\": Host[posEventos[key]],\n                \"rack\": Rack[posEventos[key]],\n                \"slot\": Slot[posEventos[key]],\n                \"data\": Data[posEventos[key]],\n                \"ip\": Host[posEventos[key]],\n                \"port\": Porta[posEventos[key]]\n            }];\n        key++;\n    }\n}\n\nkey = 0;\nflow.set(\"posEventos\", posEventos);\n\nif(posEventos != null)\n{\n    msg.payload = ins;\n    if(reset == true)\n    {\n        msg.reset = reset;\n    }\n    return msg;\n}",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 279.99998474121094,
+        "y": 139.99996948242188,
+        "wires": [
+            [
+                "c750597da2877f9c"
+            ]
+        ]
+    },
+    {
+        "id": "9ad40d41767b8f33",
+        "type": "delay",
+        "z": "790c4063f20b5b89",
+        "name": "0.2 msg/s",
+        "pauseType": "rate",
+        "timeout": "2",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "0.3",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 414.99998474121094,
+        "y": 139.99998092651367,
+        "wires": [
+            [
+                "ab6874bdb6ba9e50"
+            ]
+        ],
+        "l": false
+    },
+    {
+        "id": "ab6874bdb6ba9e50",
+        "type": "function",
+        "z": "790c4063f20b5b89",
+        "name": "forEach NodeS7",
+        "func": "let periodica = flow.get('periodica')\n\nvar devices = msg.payload;\nflow.set(\"aguarda2\", true);\n\nmsg = [];\nif(periodica != true)\n{\n    devices.forEach((/** @type {{ modbus_id: any; modbus_ip: any; modbus_port: any; address: any; quantity: any; }} */ dev) => {\n        let nodes7 = global.get('nodes7');\n        var conn = new nodes7;\n        var doneReading = false;\n        \n        var variables = {\n            DATA: dev.data\n        };\n\n        conn.initiateConnection({ port: dev.port, host: dev.ip, rack: dev.rack, slot: dev.slot, debug: false }, connected);\n        function connected(err) {\n            if (typeof (err) !== \"undefined\") {\n                // PLC FORA DO ALCANCE\n                console.log(err);\n                node.error({\n                    \"ip\": dev.ip,\n                    \"port\": dev.port,\n                    \"message\": \"ERRO! Falha na leitura do host \" + dev.ip + \"!\",\n                    \"error\": err.code\n                });\n                conn.dropConnection();\n            }\n            conn.setTranslationCB(function (tag) { return variables[tag]; });\n            conn.addItems('DATA');\n            conn.readAllItems(valuesReady);\n        }\n\n        function valuesReady(anythingBad, values) {\n            if (anythingBad) { console.log(\"ERRO! Falha na leitura do host.\"); conn.dropConnection(); }\n            console.log(values);\n            node.send({\n                \"topic\": \"TCP Response\",\n                \"host\": dev.ip,\n                \"port\": dev.port,\n                \"rack\": dev.rack,\n                \"slot\": dev.slot,\n                \"data\": dev.data,\n                \"payload\": values.DATA\n            });\n            doneReading = true;\n            if (doneReading) { conn.dropConnection(); }\n        }\n    });\n}\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 520,
+        "y": 140,
+        "wires": [
+            [
+                "103d3de42e10dd8b"
+            ]
+        ]
+    },
+    {
+        "id": "c750597da2877f9c",
+        "type": "split",
+        "z": "790c4063f20b5b89",
+        "name": "",
+        "splt": "\\n",
+        "spltType": "str",
+        "arraySplt": 1,
+        "arraySpltType": "len",
+        "stream": false,
+        "addname": "",
+        "x": 374.99998474121094,
+        "y": 139.99998092651367,
+        "wires": [
+            [
+                "9ad40d41767b8f33"
+            ]
+        ],
+        "l": false
+    },
+    {
+        "id": "103d3de42e10dd8b",
+        "type": "function",
+        "z": "790c4063f20b5b89",
+        "name": "Sai­da",
+        "func": "let CodVarEvento = global.get('CodVarEvento');\nlet UltimoValLeitura = global.get('UltimoValLeitura');\nlet dataOrigem = global.get('Data');\nlet hostOrigem = global.get('Host');\nlet posEventos = flow.get('posEventos');\nlet posEventosLeitura = [];\nlet ip = msg.host;\nlet port = msg.port;\nlet data = msg.data;\nlet leitura = [];\nlet key = 0;\n\n// verifica informaçoes\nfor(let i in hostOrigem)\n{\n    for(let j in dataOrigem)\n    {\n        if (data == dataOrigem[j] && ip == hostOrigem[i]) {\n            if (posEventos.includes(j)) {\n                if (UltimoValLeitura[j] != msg.payload)\n                {\n                    posEventosLeitura.push(j);\n                    leitura.push(msg.payload);\n                    UltimoValLeitura[j] = msg.payload;\n                    global.set(\"UltimoValLeitura\", UltimoValLeitura);\n                    flow.set(\"leitura2\", leitura);\n                    flow.set(\"posEventosLeitura\", posEventosLeitura);\n                    //node.warn(\"Eventos 1\");\n                    //node.warn(new Date().getTime());\n                    return msg;\n                }\n            }\n        }\n    }\n}",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 660,
+        "y": 140,
+        "wires": [
+            [
+                "26b2dc7bed4e3cfb"
+            ]
+        ]
+    },
+    {
+        "id": "9f52721368499e29",
+        "type": "comment",
+        "z": "790c4063f20b5b89",
+        "name": "Compara os valores das variaveis por evento e realiza as leituras",
+        "info": "",
+        "x": 270,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "310b601f33bcaa22",
+        "type": "comment",
+        "z": "790c4063f20b5b89",
+        "name": "EVENTOS",
+        "info": "",
+        "x": 100,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "259d835e85417438",
+        "type": "subflow:b41ba9c9439fbf4e",
+        "z": "790c4063f20b5b89",
+        "name": "dadosIniciaisVariaveis.json",
+        "x": 200,
+        "y": 260,
+        "wires": [
+            [
+                "71c42b95be2b2407"
+            ]
+        ]
+    },
+    {
+        "id": "bd1185859499e2a4",
+        "type": "comment",
+        "z": "790c4063f20b5b89",
+        "name": "Escreve o arquivo de sai­da e modifica o arquivo dadosIniciaisEventosVariaveis.json",
+        "info": "",
+        "x": 330,
+        "y": 200,
+        "wires": []
+    },
+    {
+        "id": "71c42b95be2b2407",
+        "type": "function",
+        "z": "790c4063f20b5b89",
+        "name": "Atribui variaveis",
+        "func": "var d = new Date();\nvar hora = (d.getHours()+\":\"+d.getMinutes()+\":\"+d.getSeconds()+\":\"+d.getMilliseconds());\n\nflow.set(\"hora2\", hora);\nflow.set(\"d2\", d);\n\nmsg.payload = d;\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 390,
+        "y": 300,
+        "wires": [
+            [
+                "7b133beffdb121cf"
+            ]
+        ]
+    },
+    {
+        "id": "7b133beffdb121cf",
+        "type": "moment",
+        "z": "790c4063f20b5b89",
+        "name": "Timezone",
+        "topic": "",
+        "input": "",
+        "inputType": "msg",
+        "inTz": "America/Sao_Paulo",
+        "adjAmount": 0,
+        "adjType": "days",
+        "adjDir": "add",
+        "format": "YYYY-MM-DDTHH:mm:ss.SSSSSSSZ",
+        "locale": "C",
+        "output": "",
+        "outputType": "msg",
+        "outTz": "America/Sao_Paulo",
+        "x": 520,
+        "y": 260,
+        "wires": [
+            [
+                "7cd93dd6b3df5144"
+            ]
+        ]
+    },
+    {
+        "id": "38739b71dc81a55f",
+        "type": "link in",
+        "z": "790c4063f20b5b89",
+        "name": "link in 5",
+        "links": [
+            "26b2dc7bed4e3cfb"
+        ],
+        "x": 55,
+        "y": 260,
+        "wires": [
+            [
+                "259d835e85417438"
+            ]
+        ]
+    },
+    {
+        "id": "7cd93dd6b3df5144",
+        "type": "link out",
+        "z": "790c4063f20b5b89",
+        "name": "link out 5",
+        "mode": "link",
+        "links": [
+            "fd5a61dc6d6be713"
+        ],
+        "x": 605,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "26b2dc7bed4e3cfb",
+        "type": "link out",
+        "z": "790c4063f20b5b89",
+        "name": "link out 6",
+        "mode": "link",
+        "links": [
+            "38739b71dc81a55f"
+        ],
+        "x": 745,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "4a918bb19a1a78cc",
+        "type": "function",
+        "z": "790c4063f20b5b89",
+        "name": "Modifica o payload saida",
+        "func": "let json = new Array();\n\nlet leitura2 = flow.get('leitura2');\nlet TipConexao = global.get('TipConexaoVar');\nlet CodVariavelLeitura = global.get('CodVariavelLeituraVar');\nlet ValMuitoBaixo = global.get('ValMuitoBaixoVar');\nlet ValBaixo = global.get('ValBaixoVar');\nlet ValAlto = global.get('ValAltoVar');\nlet ValMuitoAlto = global.get('ValMuitoAltoVar');\nlet NumCasasDecimais = global.get('NumCasasDecimaisVar');\nlet ValEscala = global.get('ValEscalaVar');\nlet CodUnidadeEmpresa = global.get('CodUnidadeEmpresaVar');\nlet TipAlarmeDigital = global.get('TipAlarmeDigitalVar');\nlet TipVariavelLeitura = global.get('TipVariavelLeituraVar');\nlet TipMonitoracaoPeriodico = global.get('TipMonitoracaoPeriodicoVar');\nlet posEventosLeitura = flow.get('posEventosLeitura');\n\nvar hora = flow.get('hora2');\nvar data = msg.payload;\n\nconst DataAtualHoraNova = hora;\nconst DataVariavelLeituraHoraNova = hora;\nconst DataVariavelLeituraDiaNova = data;\n\nflow.set(\"DataVariavelLeituraHoraNova2\", DataVariavelLeituraHoraNova);\nflow.set(\"DataVariavelLeituraDiaNova2\", DataVariavelLeituraDiaNova);\nflow.set(\"DataAtualHoraNova2\", DataAtualHoraNova);\n\nlet TipFuncionando = global.get('TipFuncionandoVar');\nlet CodAreaProcessoAPF = global.get('CodAreaProcessoAPF');\nlet CodAreaProcesso = global.get('CodAreaProcessoVar');\n\nlet escreveu2 = false;\n\nif(posEventosLeitura != null && msg.payload != null)\n{\n    for(let key in posEventosLeitura)\n    {\n        if(TipVariavelLeitura[posEventosLeitura[key]] == 1 || TipVariavelLeitura[posEventosLeitura[key]] == 2)\n        {\n            if(leitura2.length > 1)\n            {\n                for(let pos in leitura2)\n                {\n                    leitura2[pos] = leitura2[pos].toFixed(NumCasasDecimais[posEventosLeitura[key]]);\n                }\n            } else\n            {\n                leitura2 = leitura2[0].toFixed(NumCasasDecimais[posEventosLeitura[key]]);\n            }\n\n            ValMuitoBaixo[posEventosLeitura[key]] = ValMuitoBaixo[posEventosLeitura[key]].toFixed(NumCasasDecimais[posEventosLeitura[key]]);\n            ValBaixo[posEventosLeitura[key]] = ValBaixo[posEventosLeitura[key]].toFixed(NumCasasDecimais[posEventosLeitura[key]]);\n            ValAlto[posEventosLeitura[key]] = ValAlto[posEventosLeitura[key]].toFixed(NumCasasDecimais[posEventosLeitura[key]]);\n            ValMuitoAlto[posEventosLeitura[key]] = ValMuitoAlto[posEventosLeitura[key]].toFixed(NumCasasDecimais[posEventosLeitura[key]]);\n\n            if (CodAreaProcesso[posEventosLeitura[key]] == CodAreaProcessoAPF[posEventosLeitura[key]]) {\n                TipFuncionando[posEventosLeitura[key]] = true\n            }\n            \n            json.push({\n                \"CodVariavelLeitura\": CodVariavelLeitura[posEventosLeitura[key]],\n                \"ValMuitoBaixo\": ValMuitoBaixo[posEventosLeitura[key]],\n                \"ValBaixo\": ValBaixo[posEventosLeitura[key]],\n                \"ValVariavelLeitura\": leitura2,\n                \"ValVariavelLeituraString\": null,\n                \"ValAlto\": ValAlto[posEventosLeitura[key]],\n                \"ValMuitoAlto\": ValMuitoAlto[posEventosLeitura[key]],\n                \"TipFuncionando\": TipFuncionando[posEventosLeitura[key]],\n                \"DataVariavelLeitura\": DataVariavelLeituraDiaNova,\n                \"TipMonitoracaoPeriodico\": TipMonitoracaoPeriodico[posEventosLeitura[key]]\n            });\n        } else if(TipVariavelLeitura[posEventosLeitura[key]] == 3 || TipVariavelLeitura[posEventosLeitura[key]] == 4) \n        {\n            if(leitura2.length == 1)\n            {\n                json.push({\n                    \"CodVariavelLeitura\": CodVariavelLeitura[posEventosLeitura[key]],\n                    \"ValMuitoBaixo\": ValMuitoBaixo[posEventosLeitura[key]],\n                    \"ValBaixo\": ValBaixo[posEventosLeitura[key]],\n                    \"ValVariavelLeitura\": null,\n                    \"ValVariavelLeituraString\": leitura2[0],\n                    \"ValAlto\": ValAlto[posEventosLeitura[key]],\n                    \"ValMuitoAlto\": ValMuitoAlto[posEventosLeitura[key]],\n                    \"TipFuncionando\": TipFuncionando[posEventosLeitura[key]],\n                    \"DataVariavelLeituraDia\": DataVariavelLeituraDiaNova,\n                    \"TipMonitoracaoPeriodico\": TipMonitoracaoPeriodico[posEventosLeitura[key]]\n                });\n            } \n            else if(leitura2.length > 1)\n            {\n                json.push({\n                    \"CodVariavelLeitura\": CodVariavelLeitura[posEventosLeitura[key]],\n                    \"ValMuitoBaixo\": ValMuitoBaixo[posEventosLeitura[key]],\n                    \"ValBaixo\": ValBaixo[posEventosLeitura[key]],\n                    \"ValVariavelLeitura\": null,\n                    \"ValVariavelLeituraString\": leitura2,\n                    \"ValAlto\": ValAlto[posEventosLeitura[key]],\n                    \"ValMuitoAlto\": ValMuitoAlto[posEventosLeitura[key]],\n                    \"TipFuncionando\": TipFuncionando[posEventosLeitura[key]],\n                    \"DataVariavelLeituraDia\": DataVariavelLeituraDiaNova,\n                    \"TipMonitoracaoPeriodico\": TipMonitoracaoPeriodico[posEventosLeitura[key]]\n                });\n            }\n        }\n    }\n}\n\nmsg.payload = json\nif(msg.payload != \"\"){\n    escreveu2 = true\n    flow.set(\"escreveu2\", escreveu2)\n    //node.warn(\"Eventos 2\");\n    //node.warn(new Date().getTime());\n    return msg\n}",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 190,
+        "y": 400,
+        "wires": [
+            [
+                "06249fc6381dc08d"
+            ]
+        ]
+    },
+    {
+        "id": "06249fc6381dc08d",
+        "type": "json",
+        "z": "790c4063f20b5b89",
+        "name": "",
+        "property": "payload",
+        "action": "",
+        "pretty": true,
+        "x": 350,
+        "y": 360,
+        "wires": [
+            [
+                "c69fed9e8f81f0ba"
+            ]
+        ]
+    },
+    {
+        "id": "c69fed9e8f81f0ba",
+        "type": "file",
+        "z": "790c4063f20b5b89",
+        "name": "Escreve o arquivo",
+        "filename": "/home/nexxus/Documentos/ArquivosJSON/variavelLeituraValor.json",
+        "filenameType": "str",
+        "appendNewline": true,
+        "createDir": true,
+        "overwriteFile": "false",
+        "encoding": "none",
+        "x": 490,
+        "y": 400,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "ce8bd1c1a381f02b",
+        "type": "function",
+        "z": "790c4063f20b5b89",
+        "name": "escreve bash",
+        "func": "let file = \"/home/nexxus/Documentos/ArquivosJSON/dadosIniciaisEventosVariaveis.json\";\nlet data = msg.payload\nlet hora = flow.get('hora')\nlet posEventosLeitura = flow.get('posEventosLeitura')\nlet posEventos = flow.get('posEventos')\nlet linha = []\nlet CodVariavelLeitura = global.get('CodVarDI')\nlet DataVariavelLeituraHora = flow.get('DataVariavelLeituraHora')\nlet DataVariavelLeituraDiaAntiga = flow.get('DataVariavelLeituraDiaAntiga')\nlet DataAtualHora = flow.get('DataAtualHora')\nlet leitura2 = flow.get('leitura2')\n\nif(posEventosLeitura != null) {\n    for(let pos in posEventosLeitura){    \n        if(posEventosLeitura[pos] == 0){\n            linha[pos] = CodVariavelLeitura[posEventosLeitura[pos]]*7\n        } else {\n            linha[pos] = CodVariavelLeitura[posEventosLeitura[pos]]*5+2\n        }\n    }\n}\n\nmsg.payload = []\nif(leitura2.length == 1)\n{\n    for (let pos in posEventosLeitura) {\n        msg.payload[pos] = \"sed -i '\" + linha[pos] + \"s/\" + '\"' + \"UltimoValLeitura\" + '\"' + \":.*/\" + '\"' + \"UltimoValLeitura\" + '\"' + \": \" + leitura2[0] + \"/g\" + \"' \" + file;\n    }\n}\nelse if(leitura2.length > 1)\n{\n    for (let pos in posEventosLeitura) {\n        msg.payload[pos] = \"sed -i '\" + linha[pos] + \"s/\" + '\"' + \"UltimoValLeitura\" + '\"' + \":.*/\" + '\"' + \"UltimoValLeitura\" + '\"' + \": \" + leitura2 + \"/g\" + \"' \" + file;\n    }\n}\n\nmsg.rate = 500\nflow.set(\"leitura2\", [])\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 210,
+        "y": 440,
+        "wires": [
+            [
+                "ebef3944f4f29aab"
+            ]
+        ]
+    },
+    {
+        "id": "859837984cb9bbe4",
+        "type": "file",
+        "z": "790c4063f20b5b89",
+        "name": "editaVal.sh",
+        "filename": "/home/nexxus/Documentos/ArquivosJSON/editaValSiemens.sh",
+        "filenameType": "str",
+        "appendNewline": true,
+        "createDir": true,
+        "overwriteFile": "true",
+        "encoding": "none",
+        "x": 599.9999923706055,
+        "y": 439.99996757507324,
+        "wires": [
+            [
+                "bc976f47e4425a7b"
+            ]
+        ]
+    },
+    {
+        "id": "bc976f47e4425a7b",
+        "type": "exec",
+        "z": "790c4063f20b5b89",
+        "command": "bash /home/nexxus/Documentos/ArquivosJSON/editaValSiemens.sh",
+        "addpay": "",
+        "append": "",
+        "useSpawn": "false",
+        "timer": "",
+        "winHide": false,
+        "oldrc": false,
+        "name": "exec bash editaVal.sh",
+        "x": 779.9999885559082,
+        "y": 439.99996757507324,
+        "wires": [
+            [],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "ebef3944f4f29aab",
+        "type": "split",
+        "z": "790c4063f20b5b89",
+        "name": "",
+        "splt": "\\n",
+        "spltType": "str",
+        "arraySplt": 1,
+        "arraySpltType": "len",
+        "stream": false,
+        "addname": "",
+        "x": 340,
+        "y": 440,
+        "wires": [
+            [
+                "e4e5e646443ed402"
+            ]
+        ]
+    },
+    {
+        "id": "e4e5e646443ed402",
+        "type": "delay",
+        "z": "790c4063f20b5b89",
+        "name": "0.2 msg/s",
+        "pauseType": "rate",
+        "timeout": "2",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "0.2",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": true,
+        "outputs": 1,
+        "x": 459.99999809265137,
+        "y": 439.99996757507324,
+        "wires": [
+            [
+                "859837984cb9bbe4"
+            ]
+        ]
+    },
+    {
+        "id": "8a93c5c2b8d896aa",
+        "type": "function",
+        "z": "790c4063f20b5b89",
+        "name": "",
+        "func": "let escreveu2 = flow.get('escreveu2')\nif(escreveu2 ==  true){\n    return msg;\n}",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 115,
+        "y": 440,
+        "wires": [
+            [
+                "ce8bd1c1a381f02b"
+            ]
+        ],
+        "l": false
+    },
+    {
+        "id": "75b8db01db515e43",
+        "type": "delay",
+        "z": "790c4063f20b5b89",
+        "name": "",
+        "pauseType": "delay",
+        "timeout": "200",
+        "timeoutUnits": "milliseconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 75,
+        "y": 440,
+        "wires": [
+            [
+                "8a93c5c2b8d896aa"
+            ]
+        ],
+        "l": false
+    },
+    {
+        "id": "fd5a61dc6d6be713",
+        "type": "link in",
+        "z": "790c4063f20b5b89",
+        "name": "link in 6",
+        "links": [
+            "7cd93dd6b3df5144"
+        ],
+        "x": 55,
+        "y": 400,
+        "wires": [
+            [
+                "4a918bb19a1a78cc",
+                "75b8db01db515e43"
+            ]
+        ]
+    },
+    {
+        "id": "7003e9848360496b",
+        "type": "comment",
+        "z": "790c4063f20b5b89",
+        "name": "Compara em sequencia as datas das variaveis",
+        "info": "",
+        "x": 220,
+        "y": 540,
+        "wires": []
+    },
+    {
+        "id": "f2b3b82625860e82",
+        "type": "comment",
+        "z": "790c4063f20b5b89",
+        "name": "PERIODICAS",
+        "info": "",
+        "x": 110,
+        "y": 500,
+        "wires": []
     }
 ]
