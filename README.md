@@ -1,9 +1,8 @@
-node-red-gerenciador
+node-red-manager
 ====================
 
-progresso de desenvolvimento
+This repository contains the project of a reading manager for several devices in the industrial automation area.
 
 ### About
 
-This is your project's README.md file. It helps users understand what your
-project does, how to use it and anything else they may need to know.
+Devices include PLCs from Siemens and Rockwell specifically, as well as any device that has a Modbus TCP/IP communication protocol. The read data is stored in a JSON file.
