@@ -1,4 +1,4 @@
-node-red-manager
+node-red-gerenciador
 ====================
 
 This repository contains the project of a reading manager for several devices in the industrial automation area.
