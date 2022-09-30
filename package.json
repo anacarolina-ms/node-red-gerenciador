@@ -1,6 +1,6 @@
 {
     "name": "node-red-gerenciador",
-    "description": "progresso de desenvolvimento",
+    "description": "Development progress of a reading manager on multiple devices in Node-RED.",
     "version": "0.0.1",
     "dependencies": {},
     "node-red": {
