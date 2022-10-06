@@ -1,13 +1,5 @@
 [
     {
-        "id": "6dc680ce450d84b1",
-        "type": "tab",
-        "label": "jsmodbus",
-        "disabled": false,
-        "info": "",
-        "env": []
-    },
-    {
         "id": "f8a25b208ccc25c0",
         "type": "tab",
         "label": "MES MODBUS",
@@ -336,225 +328,6 @@
         "wires": [
             []
         ]
-    },
-    {
-        "id": "62559f47f6818b55",
-        "type": "function",
-        "z": "6dc680ce450d84b1",
-        "name": "",
-        "func": "var devices = msg.payload;\nglobal.set(\"aguarda\", true)\n\ndevices.forEach((/** @type {{ modbus_id: any; modbus_ip: any; modbus_port: any; address: any; quantity: any; }} */ dev) => {\n  let m_response = \"\";\n  let Modbus = global.get('jsmodbus');\n  let net = global.get('net');\n  let socket = new net.Socket();\n  let client = new Modbus.client.TCP(socket, dev.modbus_id);\n  let options = {\n    host: dev.modbus_ip,\n    port: dev.modbus_port,\n    retryTime: 500, // 1s for every retry\n    retryAlways: false // retry even if the connection was closed on purpose\n  };\n  let Reconnect = global.get('nodenetreconnect');\n  let recon = new Reconnect(socket, options)\n  \n  socket.on('connect', function () {\n    // if comparando o FC (dev.functioncode)\n    // if FC == 3\n    client\n      .readHoldingRegisters(dev.address, dev.quantity)\n      .then(function (resp) {\n        m_response = resp.response._body._values;\n        //node.warn(m_response);\n        node.send({\n          \"topic\": \"Modbus Response\",\n          \"name\": dev.modbus_ip,\n          \"port\": dev.modbus_port,\n          \"payload\": m_response\n        });\n        recon.end();\n      })\n      .catch(function () {\n        console.error(\n          require(\"util\").inspect(arguments, {\n            depth: null\n          })\n        );\n        recon.end();\n      });\n  });\n\n  socket.connect(options);\n  socket.emit('disconnect');\n\n});\nreturn null;",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 300,
-        "y": 100,
-        "wires": [
-            [
-                "abce1ad369e230cc"
-            ]
-        ]
-    },
-    {
-        "id": "fed32ff3f60dbcfe",
-        "type": "inject",
-        "z": "6dc680ce450d84b1",
-        "name": "",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "",
-        "crontab": "",
-        "once": false,
-        "onceDelay": 0.1,
-        "topic": "",
-        "payload": "[{\"delta\":0,\"name\":\"10.255.3.214\",\"modbus_id\":1,\"functioncode\":3,\"address\":0,\"quantity\":1,\"modbus_ip\":\"10.255.3.214\",\"modbus_port\":502}]",
-        "payloadType": "json",
-        "x": 140,
-        "y": 80,
-        "wires": [
-            [
-                "62559f47f6818b55"
-            ]
-        ]
-    },
-    {
-        "id": "abce1ad369e230cc",
-        "type": "debug",
-        "z": "6dc680ce450d84b1",
-        "name": "",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "payload",
-        "targetType": "msg",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 470,
-        "y": 80,
-        "wires": []
-    },
-    {
-        "id": "26e9a320b52427cd",
-        "type": "function",
-        "z": "6dc680ce450d84b1",
-        "name": "",
-        "func": "var devices = msg.payload;\nglobal.set(\"aguarda\", true)\n\ndevices.forEach((/** @type {{ modbus_id: any; modbus_ip: any; modbus_port: any; address: any; quantity: any; }} */ dev) => {\n  let m_response = \"\";\n  let Modbus = global.get('jsmodbus');\n  let net = global.get('net');\n  let socket = new net.Socket();\n  let client = new Modbus.client.TCP(socket, dev.modbus_id);\n  let options = {\n    host: dev.modbus_ip,\n    port: dev.modbus_port,\n    retryTime: 500, // 1s for every retry\n    retryAlways: false // retry even if the connection was closed on purpose\n  };\n  let Reconnect = global.get('nodenetreconnect');\n  let recon = new Reconnect(socket, options)\n  \n  socket.on('connect', function () {\n    // if comparando o FC (dev.functioncode)\n    // if FC == 3\n    client\n      .readHoldingRegisters(dev.address, dev.quantity)\n      .then(function (resp) {\n        m_response = resp.response._body._values;\n        //node.warn(m_response);\n        node.send({\n          \"topic\": \"Modbus Response\",\n          \"name\": dev.modbus_ip,\n          \"port\": dev.modbus_port,\n          \"payload\": m_response\n        });\n        recon.end();\n      })\n      .catch(function () {\n        console.error(\n          require(\"util\").inspect(arguments, {\n            depth: null\n          })\n        );\n        recon.end();\n      });\n  });\n\n  socket.connect(options);\n  socket.emit('disconnect');\n\n});\nreturn null;",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 300,
-        "y": 180,
-        "wires": [
-            [
-                "856628821449931f"
-            ]
-        ]
-    },
-    {
-        "id": "2d4c55cd1e835ebc",
-        "type": "inject",
-        "z": "6dc680ce450d84b1",
-        "name": "",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "",
-        "crontab": "",
-        "once": false,
-        "onceDelay": 0.1,
-        "topic": "",
-        "payload": "[{\"delta\":0,\"name\":\"10.255.3.214\",\"modbus_id\":1,\"functioncode\":3,\"address\":0,\"quantity\":1,\"modbus_ip\":\"10.255.3.214\",\"modbus_port\":502}]",
-        "payloadType": "json",
-        "x": 140,
-        "y": 160,
-        "wires": [
-            [
-                "26e9a320b52427cd"
-            ]
-        ]
-    },
-    {
-        "id": "856628821449931f",
-        "type": "debug",
-        "z": "6dc680ce450d84b1",
-        "name": "",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "payload",
-        "targetType": "msg",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 470,
-        "y": 160,
-        "wires": []
-    },
-    {
-        "id": "494ab0ad37802731",
-        "type": "modbus-flex-getter",
-        "z": "6dc680ce450d84b1",
-        "d": true,
-        "name": "",
-        "showStatusActivities": false,
-        "showErrors": false,
-        "logIOActivities": false,
-        "server": "",
-        "useIOFile": false,
-        "ioFile": "",
-        "useIOForPayload": false,
-        "emptyMsgOnFail": false,
-        "keepMsgProperties": false,
-        "x": 490,
-        "y": 460,
-        "wires": [
-            [
-                "ea2e27f5e1438e7e"
-            ],
-            []
-        ]
-    },
-    {
-        "id": "3999f003fa3c95a1",
-        "type": "function",
-        "z": "6dc680ce450d84b1",
-        "name": "",
-        "func": "msg.payload = { value: msg.payload, 'fc': 3, 'unitid': 1, 'address': 0, 'quantity': 1 } \nreturn msg\n",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 280,
-        "y": 460,
-        "wires": [
-            [
-                "494ab0ad37802731"
-            ]
-        ]
-    },
-    {
-        "id": "3100dd5b937f2b18",
-        "type": "inject",
-        "z": "6dc680ce450d84b1",
-        "name": "",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "",
-        "crontab": "",
-        "once": false,
-        "onceDelay": 0.1,
-        "topic": "",
-        "payload": "[{\"delta\":0,\"name\":\"10.255.3.214\",\"modbus_id\":1,\"functioncode\":3,\"address\":0,\"quantity\":1,\"modbus_ip\":\"10.255.3.214\",\"modbus_port\":502}]",
-        "payloadType": "json",
-        "x": 120,
-        "y": 440,
-        "wires": [
-            [
-                "3999f003fa3c95a1"
-            ]
-        ]
-    },
-    {
-        "id": "ea2e27f5e1438e7e",
-        "type": "debug",
-        "z": "6dc680ce450d84b1",
-        "name": "",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "true",
-        "targetType": "full",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 670,
-        "y": 460,
-        "wires": []
     },
     {
         "id": "b9d6acc498defdd2",
@@ -1061,7 +834,7 @@
         "type": "function",
         "z": "f8a25b208ccc25c0",
         "name": "Verifica se o tempo estourou",
-        "func": "let DataVariavelLeituraDiaAntiga = global.get('DataVariavelLeituraDiaAntiga');\nlet TipUnidadePeriodo = global.get('TipUnidadePeriodo');\nlet ValPeriodo = global.get('ValPeriodo');\nlet tempo = [];\nlet posLeiturasPeriodicas = \"\";\nvar d = new Date();\nlet antiga = [];\nlet erro = flow.get('erro');\nlet aguarda = flow.get('aguarda') || false;\nlet posIgnore = global.get('posIgnore');\nlet pos = [];\n\n// Codigo das variaveis a serem lidas periodicamente\nvar CodVar = global.get('CodVariavelLeituraVar');\nvar CodVarDI = global.get('CodVarDI');\nvar Host = global.get('Host');\nvar Porta = global.get('Porta');\nvar TipConexao = global.get('TipConexao');\nvar Fc = global.get('Fc');\nvar Address = global.get('Address');\nvar Quantity = global.get('Quantity');\nvar Unitid = global.get('Unitid');\nvar CodVariavelLeitura = global.get('CodVariavelLeitura');\nvar TipVariavelLeitura = global.get('TipVariavelLeitura');\n\nlet ins = {};\nlet key = 0;\n\nfor(let i in TipUnidadePeriodo)\n{\n    antiga[i] = new Date(Date.parse(DataVariavelLeituraDiaAntiga[i]));\n    switch(TipUnidadePeriodo[i])\n    {\n        case 1: // segundo\n            antiga[i].setSeconds(antiga[i].getSeconds() + ValPeriodo[i]);\n            break;\n        case 2: // minuto\n            antiga[i].setMinutes(antiga[i].getMinutes() + ValPeriodo[i]);\n            break;\n        case 3: // hora\n            antiga[i].setHours(antiga[i].getHours() + ValPeriodo[i]);\n            break;\n    }\n}\n\nif(tempo != null)\n{\n    for(let i in DataVariavelLeituraDiaAntiga)\n    {\n        if (TipConexao[i] == \"TCP\") \n        {\n            if(antiga[i] <= d.getTime())\n            {\n                pos = i;\n            }\n        }\n    }\n}\n\nif(pos != null)\n{\n    if (!posIgnore.includes(pos)) \n    {\n        posLeiturasPeriodicas = pos;\n        ins[0] = [{ \n            \"delta\": key,\n            \"name\": Host[posLeiturasPeriodicas],\n            \"modbus_id\": Unitid[posLeiturasPeriodicas],\n            \"functioncode\": Fc[posLeiturasPeriodicas],\n            \"address\": Address[posLeiturasPeriodicas],\n            \"quantity\": Quantity[posLeiturasPeriodicas],\n            \"modbus_ip\": Host[posLeiturasPeriodicas],\n            \"modbus_port\": Porta[posLeiturasPeriodicas]\n        }]\n        key++\n    }\n}\n\nkey = 0\nflow.set(\"posLeiturasPeriodicas\", posLeiturasPeriodicas);\n\nif(posLeiturasPeriodicas != \"\" && aguarda == false){\n    msg.payload = ins\n    flow.set(\"conta\", 0);\n    node.warn(\"Periodicas 1\");\n    node.warn(new Date().getTime());\n    return msg\n}",
+        "func": "let DataVariavelLeituraDiaAntiga = global.get('DataVariavelLeituraDiaAntiga');\nlet TipUnidadePeriodo = global.get('TipUnidadePeriodo');\nlet ValPeriodo = global.get('ValPeriodo');\nlet tempo = [];\nlet posLeiturasPeriodicas = \"\";\nvar d = new Date();\nlet antiga = [];\nlet erro = flow.get('erro');\nlet aguarda = flow.get('aguarda') || false;\nlet posIgnore = global.get('posIgnore');\nlet pos = [];\n\n// Codigo das variaveis a serem lidas periodicamente\nvar CodVar = global.get('CodVariavelLeituraVar');\nvar CodVarDI = global.get('CodVarDI');\nvar Host = global.get('Host');\nvar Porta = global.get('Porta');\nvar TipConexao = global.get('TipConexao');\nvar Fc = global.get('Fc');\nvar Address = global.get('Address');\nvar Quantity = global.get('Quantity');\nvar Unitid = global.get('Unitid');\nvar CodVariavelLeitura = global.get('CodVariavelLeitura');\nvar TipVariavelLeitura = global.get('TipVariavelLeitura');\n\nlet ins = {};\nlet key = 0;\n\nfor(let i in TipUnidadePeriodo)\n{\n    antiga[i] = new Date(Date.parse(DataVariavelLeituraDiaAntiga[i]));\n    switch(TipUnidadePeriodo[i])\n    {\n        case 1: // segundo\n            antiga[i].setSeconds(antiga[i].getSeconds() + ValPeriodo[i]);\n            break;\n        case 2: // minuto\n            antiga[i].setMinutes(antiga[i].getMinutes() + ValPeriodo[i]);\n            break;\n        case 3: // hora\n            antiga[i].setHours(antiga[i].getHours() + ValPeriodo[i]);\n            break;\n    }\n}\n\nif(tempo != null)\n{\n    for(let i in DataVariavelLeituraDiaAntiga)\n    {\n        if (TipConexao[i] == \"TCP\") \n        {\n            if(antiga[i] <= d.getTime())\n            {\n                pos = i;\n            }\n        }\n    }\n}\n\nif(pos != null)\n{\n    if (!posIgnore.includes(pos)) \n    {\n        posLeiturasPeriodicas = pos;\n        ins[0] = [{ \n            \"delta\": key,\n            \"name\": Host[posLeiturasPeriodicas],\n            \"modbus_id\": Unitid[posLeiturasPeriodicas],\n            \"functioncode\": Fc[posLeiturasPeriodicas],\n            \"address\": Address[posLeiturasPeriodicas],\n            \"quantity\": Quantity[posLeiturasPeriodicas],\n            \"modbus_ip\": Host[posLeiturasPeriodicas],\n            \"modbus_port\": Porta[posLeiturasPeriodicas]\n        }]\n        key++\n    }\n}\n\nkey = 0\nflow.set(\"posLeiturasPeriodicas\", posLeiturasPeriodicas);\n\nif(posLeiturasPeriodicas != \"\" && aguarda == false){\n    msg.payload = ins\n    flow.set(\"conta\", 0);\n    node.warn(\"Periodicas MODBUS 1\");\n    node.warn(new Date().getTime());\n    return msg\n}",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -1273,7 +1046,7 @@
         "type": "function",
         "z": "f8a25b208ccc25c0",
         "name": "Modifica o payload saida",
-        "func": "let json = new Array();\n\nlet leitura = flow.get('leitura');\nlet TipConexao = global.get('TipConexaoVar');\nlet CodVariavelLeitura = global.get('CodVariavelLeituraVar');\nlet ValMuitoBaixo = global.get('ValMuitoBaixoVar');\nlet ValBaixo = global.get('ValBaixoVar');\nlet ValAlto = global.get('ValAltoVar');\nlet ValMuitoAlto = global.get('ValMuitoAltoVar');\nlet NumCasasDecimais = global.get('NumCasasDecimaisVar');\nlet ValEscala = global.get('ValEscalaVar');\nlet CodUnidadeEmpresa = global.get('CodUnidadeEmpresaVar');\nlet TipAlarmeDigital = global.get('TipAlarmeDigitalVar');\nlet TipVariavelLeitura = global.get('TipVariavelLeituraVar');\nlet TipMonitoracaoPeriodico = global.get('TipMonitoracaoPeriodicoVar');\n\nvar hora = flow.get('hora');\nvar data = msg.payload;\n\nconst DataAtualHoraNova = hora;\nconst DataVariavelLeituraHoraNova = hora;\nconst DataVariavelLeituraDiaNova = data;\n\nflow.set(\"DataVariavelLeituraHoraNova\", DataVariavelLeituraHoraNova);\nflow.set(\"DataVariavelLeituraDiaNova\", DataVariavelLeituraDiaNova);\nflow.set(\"DataAtualHoraNova\", DataAtualHoraNova);\n\nlet posLeiturasPeriodicas = flow.get('posLeiturasPeriodicas');\n\nlet TipFuncionando = global.get('TipFuncionandoVar');\nlet CodAreaProcessoAPF = global.get('CodAreaProcessoAPF');\nlet CodAreaProcesso = global.get('CodAreaProcessoVar');\n\nlet escreveu = false;\n\nif (posLeiturasPeriodicas != null && msg.payload != null)\n{   \n    if (TipVariavelLeitura[posLeiturasPeriodicas] == 1 || TipVariavelLeitura[posLeiturasPeriodicas] == 2)\n    {\n        leitura = leitura.toFixed(NumCasasDecimais[posLeiturasPeriodicas]);\n\n        ValMuitoBaixo[posLeiturasPeriodicas] = ValMuitoBaixo[posLeiturasPeriodicas].toFixed(NumCasasDecimais[posLeiturasPeriodicas]);\n        ValBaixo[posLeiturasPeriodicas] = ValBaixo[posLeiturasPeriodicas].toFixed(NumCasasDecimais[posLeiturasPeriodicas]);\n        ValAlto[posLeiturasPeriodicas] = ValAlto[posLeiturasPeriodicas].toFixed(NumCasasDecimais[posLeiturasPeriodicas]);\n        ValMuitoAlto[posLeiturasPeriodicas] = ValMuitoAlto[posLeiturasPeriodicas].toFixed(NumCasasDecimais[posLeiturasPeriodicas]);\n\n        if (CodAreaProcesso[posLeiturasPeriodicas] == CodAreaProcessoAPF[posLeiturasPeriodicas]) \n        {\n            TipFuncionando[posLeiturasPeriodicas] = true;\n        }\n\n        json.push({\n            \"CodVariavelLeitura\": CodVariavelLeitura[posLeiturasPeriodicas],\n            \"ValMuitoBaixo\": ValMuitoBaixo[posLeiturasPeriodicas],\n            \"ValBaixo\": ValBaixo[posLeiturasPeriodicas],\n            \"ValVariavelLeitura\": leitura,\n            \"ValVariavelLeituraString\": null,\n            \"ValAlto\": ValAlto[posLeiturasPeriodicas],\n            \"ValMuitoAlto\": ValMuitoAlto[posLeiturasPeriodicas],\n            \"TipFuncionando\": TipFuncionando[posLeiturasPeriodicas],\n            \"DataVariavelLeitura\": DataVariavelLeituraDiaNova,\n            \"TipMonitoracaoPeriodico\": TipMonitoracaoPeriodico[posLeiturasPeriodicas]\n        });\n\n    } else if (TipVariavelLeitura[posLeiturasPeriodicas] == 3 || TipVariavelLeitura[posLeiturasPeriodicas] == 4) {\n        json.push({\n            \"CodVariavelLeitura\": CodVariavelLeitura[posLeiturasPeriodicas],\n            \"ValMuitoBaixo\": ValMuitoBaixo[posLeiturasPeriodicas],\n            \"ValBaixo\": ValBaixo[posLeiturasPeriodicas],\n            \"ValVariavelLeitura\": null,\n            \"ValVariavelLeituraString\": leitura,\n            \"ValAlto\": ValAlto[posLeiturasPeriodicas],\n            \"ValMuitoAlto\": ValMuitoAlto[posLeiturasPeriodicas],\n            \"TipFuncionando\": TipFuncionando[posLeiturasPeriodicas],\n            \"DataVariavelLeituraDia\": DataVariavelLeituraDiaNova,\n            \"TipMonitoracaoPeriodico\": TipMonitoracaoPeriodico[posLeiturasPeriodicas]\n        });\n    }\n}\n\n\nmsg.payload = json;\nif(msg.payload != \"\")\n{\n    escreveu = true\n    flow.set(\"escreveu\", escreveu);\n    flow.set(\"contador\", 0)\n    flow.set(\"leitura\", [])\n    node.warn(\"Periodicas 2\");\n    node.warn(new Date().getTime());\n    return msg;\n}",
+        "func": "let json = new Array();\n\nlet leitura = flow.get('leitura');\nlet TipConexao = global.get('TipConexaoVar');\nlet CodVariavelLeitura = global.get('CodVariavelLeituraVar');\nlet ValMuitoBaixo = global.get('ValMuitoBaixoVar');\nlet ValBaixo = global.get('ValBaixoVar');\nlet ValAlto = global.get('ValAltoVar');\nlet ValMuitoAlto = global.get('ValMuitoAltoVar');\nlet NumCasasDecimais = global.get('NumCasasDecimaisVar');\nlet ValEscala = global.get('ValEscalaVar');\nlet CodUnidadeEmpresa = global.get('CodUnidadeEmpresaVar');\nlet TipAlarmeDigital = global.get('TipAlarmeDigitalVar');\nlet TipVariavelLeitura = global.get('TipVariavelLeituraVar');\nlet TipMonitoracaoPeriodico = global.get('TipMonitoracaoPeriodicoVar');\n\nvar hora = flow.get('hora');\nvar data = msg.payload;\n\nconst DataAtualHoraNova = hora;\nconst DataVariavelLeituraHoraNova = hora;\nconst DataVariavelLeituraDiaNova = data;\n\nflow.set(\"DataVariavelLeituraHoraNova\", DataVariavelLeituraHoraNova);\nflow.set(\"DataVariavelLeituraDiaNova\", DataVariavelLeituraDiaNova);\nflow.set(\"DataAtualHoraNova\", DataAtualHoraNova);\n\nlet posLeiturasPeriodicas = flow.get('posLeiturasPeriodicas');\n\nlet TipFuncionando = global.get('TipFuncionandoVar');\nlet CodAreaProcessoAPF = global.get('CodAreaProcessoAPF');\nlet CodAreaProcesso = global.get('CodAreaProcessoVar');\n\nlet escreveu = false;\n\nif (posLeiturasPeriodicas != null && msg.payload != null)\n{   \n    if (TipVariavelLeitura[posLeiturasPeriodicas] == 1 || TipVariavelLeitura[posLeiturasPeriodicas] == 2)\n    {\n        leitura = leitura.toFixed(NumCasasDecimais[posLeiturasPeriodicas]);\n\n        ValMuitoBaixo[posLeiturasPeriodicas] = ValMuitoBaixo[posLeiturasPeriodicas].toFixed(NumCasasDecimais[posLeiturasPeriodicas]);\n        ValBaixo[posLeiturasPeriodicas] = ValBaixo[posLeiturasPeriodicas].toFixed(NumCasasDecimais[posLeiturasPeriodicas]);\n        ValAlto[posLeiturasPeriodicas] = ValAlto[posLeiturasPeriodicas].toFixed(NumCasasDecimais[posLeiturasPeriodicas]);\n        ValMuitoAlto[posLeiturasPeriodicas] = ValMuitoAlto[posLeiturasPeriodicas].toFixed(NumCasasDecimais[posLeiturasPeriodicas]);\n\n        if (CodAreaProcesso[posLeiturasPeriodicas] == CodAreaProcessoAPF[posLeiturasPeriodicas]) \n        {\n            TipFuncionando[posLeiturasPeriodicas] = true;\n        }\n\n        json.push({\n            \"CodVariavelLeitura\": CodVariavelLeitura[posLeiturasPeriodicas],\n            \"ValMuitoBaixo\": ValMuitoBaixo[posLeiturasPeriodicas],\n            \"ValBaixo\": ValBaixo[posLeiturasPeriodicas],\n            \"ValVariavelLeitura\": leitura,\n            \"ValVariavelLeituraString\": null,\n            \"ValAlto\": ValAlto[posLeiturasPeriodicas],\n            \"ValMuitoAlto\": ValMuitoAlto[posLeiturasPeriodicas],\n            \"TipFuncionando\": TipFuncionando[posLeiturasPeriodicas],\n            \"DataVariavelLeitura\": DataVariavelLeituraDiaNova,\n            \"TipMonitoracaoPeriodico\": TipMonitoracaoPeriodico[posLeiturasPeriodicas]\n        });\n\n    } else if (TipVariavelLeitura[posLeiturasPeriodicas] == 3 || TipVariavelLeitura[posLeiturasPeriodicas] == 4) {\n        json.push({\n            \"CodVariavelLeitura\": CodVariavelLeitura[posLeiturasPeriodicas],\n            \"ValMuitoBaixo\": ValMuitoBaixo[posLeiturasPeriodicas],\n            \"ValBaixo\": ValBaixo[posLeiturasPeriodicas],\n            \"ValVariavelLeitura\": null,\n            \"ValVariavelLeituraString\": leitura,\n            \"ValAlto\": ValAlto[posLeiturasPeriodicas],\n            \"ValMuitoAlto\": ValMuitoAlto[posLeiturasPeriodicas],\n            \"TipFuncionando\": TipFuncionando[posLeiturasPeriodicas],\n            \"DataVariavelLeituraDia\": DataVariavelLeituraDiaNova,\n            \"TipMonitoracaoPeriodico\": TipMonitoracaoPeriodico[posLeiturasPeriodicas]\n        });\n    }\n}\n\n\nmsg.payload = json;\nif(msg.payload != \"\")\n{\n    escreveu = true\n    flow.set(\"escreveu\", escreveu);\n    flow.set(\"contador\", 0)\n    flow.set(\"leitura\", [])\n    node.warn(\"Periodicas MODBUS 2\");\n    node.warn(new Date().getTime());\n    return msg;\n}",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -2166,7 +1939,7 @@
         "type": "function",
         "z": "790c4063f20b5b89",
         "name": "Verifica se o tempo estourou",
-        "func": "let DataVariavelLeituraDiaAntiga = global.get('DataVariavelLeituraDiaAntiga');\nlet TipUnidadePeriodo = global.get('TipUnidadePeriodo');\nlet ValPeriodo = global.get('ValPeriodo');\nlet tempo = [];\nlet posLeiturasPeriodicas = \"\";\nvar d = new Date();\nlet antiga = [];\nlet aguarda = flow.get('aguarda') || false;\nlet posIgnore = global.get('posIgnore');\nlet pos = [];\n\n// Codigo das variaveis a serem lidas periodicamente\nvar CodVar = global.get('CodVariavelLeituraVar');\nvar CodVarDI = global.get('CodVarDI');\nvar Host = global.get('Host');\nvar Porta = global.get('Porta');\nvar TipConexao = global.get('TipConexao');\nvar Rack = global.get('Rack');\nvar Slot = global.get('Slot');\nvar Data = global.get('Data');\nvar CodVariavelLeitura = global.get('CodVariavelLeitura');\nvar TipVariavelLeitura = global.get('TipVariavelLeitura');\n\nlet ins = {};\nlet key = 0;\n\nfor(let i in TipUnidadePeriodo)\n{\n    antiga[i] = new Date(Date.parse(DataVariavelLeituraDiaAntiga[i]));\n    switch(TipUnidadePeriodo[i])\n    {\n        case 1: // segundo\n            antiga[i].setSeconds(antiga[i].getSeconds() + ValPeriodo[i]);\n            break;\n        case 2: // minuto\n            antiga[i].setMinutes(antiga[i].getMinutes() + ValPeriodo[i]);\n            break;\n        case 3: // hora\n            antiga[i].setHours(antiga[i].getHours() + ValPeriodo[i]);\n            break;\n    }\n}\n\nif(tempo != null)\n{\n    for(let i in DataVariavelLeituraDiaAntiga)\n    {\n        if (TipConexao[i] == \"SIEMENS\") \n        {\n            if(antiga[i] <= d.getTime())\n            {\n                pos = i;\n            }\n        }\n    }\n}\n\nif(pos != null)\n{\n    if (!posIgnore.includes(pos)) \n    {\n        posLeiturasPeriodicas = pos;\n        ins[0] = [{ \n            \"delta\": key,\n            \"name\": Host[posLeiturasPeriodicas],\n            \"rack\": Rack[posLeiturasPeriodicas],\n            \"slot\": Slot[posLeiturasPeriodicas],\n            \"data\": Data[posLeiturasPeriodicas],\n            \"ip\": Host[posLeiturasPeriodicas],\n            \"port\": Porta[posLeiturasPeriodicas]\n        }]\n        key++\n    }\n}\n\nkey = 0\nflow.set(\"posLeiturasPeriodicas\", posLeiturasPeriodicas);\n\nif(posLeiturasPeriodicas != \"\" && aguarda == false){\n    msg.payload = ins\n    flow.set(\"conta\", 0);\n    node.warn(\"Periodicas 1\");\n    node.warn(new Date().getTime());\n    return msg\n}",
+        "func": "let DataVariavelLeituraDiaAntiga = global.get('DataVariavelLeituraDiaAntiga');\nlet TipUnidadePeriodo = global.get('TipUnidadePeriodo');\nlet ValPeriodo = global.get('ValPeriodo');\nlet tempo = [];\nlet posLeiturasPeriodicas = \"\";\nvar d = new Date();\nlet antiga = [];\nlet aguarda = flow.get('aguarda') || false;\nlet posIgnore = global.get('posIgnore');\nlet pos = [];\n\n// Codigo das variaveis a serem lidas periodicamente\nvar CodVar = global.get('CodVariavelLeituraVar');\nvar CodVarDI = global.get('CodVarDI');\nvar Host = global.get('Host');\nvar Porta = global.get('Porta');\nvar TipConexao = global.get('TipConexao');\nvar Rack = global.get('Rack');\nvar Slot = global.get('Slot');\nvar Data = global.get('Data');\nvar CodVariavelLeitura = global.get('CodVariavelLeitura');\nvar TipVariavelLeitura = global.get('TipVariavelLeitura');\n\nlet ins = {};\nlet key = 0;\n\nfor(let i in TipUnidadePeriodo)\n{\n    antiga[i] = new Date(Date.parse(DataVariavelLeituraDiaAntiga[i]));\n    switch(TipUnidadePeriodo[i])\n    {\n        case 1: // segundo\n            antiga[i].setSeconds(antiga[i].getSeconds() + ValPeriodo[i]);\n            break;\n        case 2: // minuto\n            antiga[i].setMinutes(antiga[i].getMinutes() + ValPeriodo[i]);\n            break;\n        case 3: // hora\n            antiga[i].setHours(antiga[i].getHours() + ValPeriodo[i]);\n            break;\n    }\n}\n\nif(tempo != null)\n{\n    for(let i in DataVariavelLeituraDiaAntiga)\n    {\n        if (TipConexao[i] == \"SIEMENS\") \n        {\n            if(antiga[i] <= d.getTime())\n            {\n                pos = i;\n            }\n        }\n    }\n}\n\nif(pos != null)\n{\n    if (!posIgnore.includes(pos)) \n    {\n        posLeiturasPeriodicas = pos;\n        ins[0] = [{ \n            \"delta\": key,\n            \"name\": Host[posLeiturasPeriodicas],\n            \"rack\": Rack[posLeiturasPeriodicas],\n            \"slot\": Slot[posLeiturasPeriodicas],\n            \"data\": Data[posLeiturasPeriodicas],\n            \"ip\": Host[posLeiturasPeriodicas],\n            \"port\": Porta[posLeiturasPeriodicas]\n        }]\n        key++\n    }\n}\n\nkey = 0\nflow.set(\"posLeiturasPeriodicas\", posLeiturasPeriodicas);\n\nif(posLeiturasPeriodicas != \"\" && aguarda == false){\n    msg.payload = ins\n    flow.set(\"conta\", 0);\n    node.warn(\"Periodicas Siemens 1\");\n    node.warn(new Date().getTime());\n    return msg\n}",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -2205,7 +1978,7 @@
         "type": "function",
         "z": "790c4063f20b5b89",
         "name": "forEach NodeS7",
-        "func": "let posLeiturasPeriodicas = flow.get(\"posLeiturasPeriodicas\");\nvar devices = msg.payload;\nflow.set(\"aguarda\", true);\nflow.set(\"periodica\", true);\n\nmsg = [];\n\ndevices.forEach((/** @type {{ modbus_id: any; modbus_ip: any; modbus_port: any; address: any; quantity: any; }} */ dev) => {\n   let nodes7 = global.get('nodes7');\n   var conn = new nodes7;\n   var doneReading = false;\n\n   var variables = {\n      DATA: dev.data\n   };\n\n   conn.initiateConnection({ port: dev.port, host: dev.ip, rack: dev.rack, slot: dev.slot, debug: false }, connected);\n   function connected(err) {\n      if (typeof (err) !== \"undefined\") {\n         // PLC FORA DO ALCANCE\n         //console.log(err);\n         node.error({\n            \"ip\": dev.ip,\n            \"port\": dev.port,\n            \"message\": \"ERRO! Falha na leitura do host \" + dev.ip + \"!\",\n            \"error\": err.code\n         });\n         flow.set(\"aguarda\", false);\n         conn.dropConnection();\n      }\n      conn.setTranslationCB(function (tag) { return variables[tag]; });\n      conn.addItems('DATA');\n      conn.readAllItems(valuesReady);\n   }\n\n   function valuesReady(anythingBad, values) {\n      if (anythingBad) { console.log(\"ERRO! Falha na leitura do host.\"); flow.set(\"aguarda\", false); conn.dropConnection(); }\n      //console.log(values);\n      if (values.DATA != \"BAD 255\") {\n         node.send({\n            \"topic\": \"TCP Response\",\n            \"host\": dev.ip,\n            \"port\": dev.port,\n            \"rack\": dev.rack,\n            \"slot\": dev.slot,\n            \"data\": dev.data,\n            \"payload\": values.DATA\n         });\n      }\n      doneReading = true;\n      if (doneReading) { conn.dropConnection(); }\n   }\n});\n\nreturn msg;",
+        "func": "let posLeiturasPeriodicas = flow.get(\"posLeiturasPeriodicas\");\nvar devices = msg.payload;\nflow.set(\"aguarda\", true);\nflow.set(\"periodica\", true);\n\nmsg = [];\n\nlet nodes7 = global.get('nodes7');\nvar conn = new nodes7;\nvar doneReading = false;\n\ndevices.forEach((/** @type {{ modbus_id: any; modbus_ip: any; modbus_port: any; address: any; quantity: any; }} */ dev) => {\n   var variables = {\n      DATA: dev.data\n   };\n   \n   conn.initiateConnection({ port: dev.port, host: dev.ip, rack: dev.rack, slot: dev.slot, debug: false }, connected);\n   function connected(err) {\n      if (typeof (err) !== \"undefined\") {\n         // PLC FORA DO ALCANCE\n         //console.log(err);\n         node.error({\n            \"ip\": dev.ip,\n            \"port\": dev.port,\n            \"message\": \"ERRO! Falha na leitura do host \" + dev.ip + \"!\",\n            \"error\": err.code\n         });\n         flow.set(\"aguarda\", false);\n         conn.dropConnection();\n         conn.connectionCleanup();\n      }\n      conn.setTranslationCB(function (tag) { return variables[tag]; });\n      conn.addItems('DATA');\n      conn.readAllItems(valuesReady);\n   }\n\n   function valuesReady(anythingBad, values) {\n      if (anythingBad) { console.log(\"ERRO! Falha na leitura do host.\"); flow.set(\"aguarda\", false); conn.dropConnection(); conn.connectionCleanup(); }\n      //console.log(values);\n      if (values.DATA != \"BAD 255\") {\n         node.send({\n            \"topic\": \"TCP Response\",\n            \"host\": dev.ip,\n            \"port\": dev.port,\n            \"rack\": dev.rack,\n            \"slot\": dev.slot,\n            \"data\": dev.data,\n            \"payload\": values.DATA\n         });\n      }\n      doneReading = true;\n      conn.dropConnection();\n      conn.connectionCleanup();\n   }\n});\n\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -2378,7 +2151,7 @@
         "type": "function",
         "z": "790c4063f20b5b89",
         "name": "Modifica o payload saida",
-        "func": "let json = new Array();\n\nlet leitura = flow.get('leitura');\nlet TipConexao = global.get('TipConexaoVar');\nlet CodVariavelLeitura = global.get('CodVariavelLeituraVar');\nlet ValMuitoBaixo = global.get('ValMuitoBaixoVar');\nlet ValBaixo = global.get('ValBaixoVar');\nlet ValAlto = global.get('ValAltoVar');\nlet ValMuitoAlto = global.get('ValMuitoAltoVar');\nlet NumCasasDecimais = global.get('NumCasasDecimaisVar');\nlet ValEscala = global.get('ValEscalaVar');\nlet CodUnidadeEmpresa = global.get('CodUnidadeEmpresaVar');\nlet TipAlarmeDigital = global.get('TipAlarmeDigitalVar');\nlet TipVariavelLeitura = global.get('TipVariavelLeituraVar');\nlet TipMonitoracaoPeriodico = global.get('TipMonitoracaoPeriodicoVar');\n\nvar hora = flow.get('hora');\nvar data = msg.payload;\n\nconst DataAtualHoraNova = hora;\nconst DataVariavelLeituraHoraNova = hora;\nconst DataVariavelLeituraDiaNova = data;\n\nflow.set(\"DataVariavelLeituraHoraNova\", DataVariavelLeituraHoraNova);\nflow.set(\"DataVariavelLeituraDiaNova\", DataVariavelLeituraDiaNova);\nflow.set(\"DataAtualHoraNova\", DataAtualHoraNova);\n\nlet posLeiturasPeriodicas = flow.get('posLeiturasPeriodicas');\n\nlet TipFuncionando = global.get('TipFuncionandoVar');\nlet CodAreaProcessoAPF = global.get('CodAreaProcessoAPF');\nlet CodAreaProcesso = global.get('CodAreaProcessoVar');\n\nlet escreveu = false;\n\nif (posLeiturasPeriodicas != null && msg.payload != null)\n{   \n    if (TipVariavelLeitura[posLeiturasPeriodicas] == 1 || TipVariavelLeitura[posLeiturasPeriodicas] == 2)\n    {\n        leitura = leitura.toFixed(NumCasasDecimais[posLeiturasPeriodicas]);\n\n        ValMuitoBaixo[posLeiturasPeriodicas] = ValMuitoBaixo[posLeiturasPeriodicas].toFixed(NumCasasDecimais[posLeiturasPeriodicas]);\n        ValBaixo[posLeiturasPeriodicas] = ValBaixo[posLeiturasPeriodicas].toFixed(NumCasasDecimais[posLeiturasPeriodicas]);\n        ValAlto[posLeiturasPeriodicas] = ValAlto[posLeiturasPeriodicas].toFixed(NumCasasDecimais[posLeiturasPeriodicas]);\n        ValMuitoAlto[posLeiturasPeriodicas] = ValMuitoAlto[posLeiturasPeriodicas].toFixed(NumCasasDecimais[posLeiturasPeriodicas]);\n\n        if (CodAreaProcesso[posLeiturasPeriodicas] == CodAreaProcessoAPF[posLeiturasPeriodicas]) \n        {\n            TipFuncionando[posLeiturasPeriodicas] = true;\n        }\n\n        json.push({\n            \"CodVariavelLeitura\": CodVariavelLeitura[posLeiturasPeriodicas],\n            \"ValMuitoBaixo\": ValMuitoBaixo[posLeiturasPeriodicas],\n            \"ValBaixo\": ValBaixo[posLeiturasPeriodicas],\n            \"ValVariavelLeitura\": leitura,\n            \"ValVariavelLeituraString\": null,\n            \"ValAlto\": ValAlto[posLeiturasPeriodicas],\n            \"ValMuitoAlto\": ValMuitoAlto[posLeiturasPeriodicas],\n            \"TipFuncionando\": TipFuncionando[posLeiturasPeriodicas],\n            \"DataVariavelLeitura\": DataVariavelLeituraDiaNova,\n            \"TipMonitoracaoPeriodico\": TipMonitoracaoPeriodico[posLeiturasPeriodicas]\n        });\n\n    } else if (TipVariavelLeitura[posLeiturasPeriodicas] == 3 || TipVariavelLeitura[posLeiturasPeriodicas] == 4) {\n        node.warn(leitura)\n        json.push({\n            \"CodVariavelLeitura\": CodVariavelLeitura[posLeiturasPeriodicas],\n            \"ValMuitoBaixo\": ValMuitoBaixo[posLeiturasPeriodicas],\n            \"ValBaixo\": ValBaixo[posLeiturasPeriodicas],\n            \"ValVariavelLeitura\": null,\n            \"ValVariavelLeituraString\": leitura,\n            \"ValAlto\": ValAlto[posLeiturasPeriodicas],\n            \"ValMuitoAlto\": ValMuitoAlto[posLeiturasPeriodicas],\n            \"TipFuncionando\": TipFuncionando[posLeiturasPeriodicas],\n            \"DataVariavelLeituraDia\": DataVariavelLeituraDiaNova,\n            \"TipMonitoracaoPeriodico\": TipMonitoracaoPeriodico[posLeiturasPeriodicas]\n        });\n    }\n}\n\nmsg.payload = json;\nif(msg.payload != \"\")\n{\n    escreveu = true\n    flow.set(\"escreveu\", escreveu);\n    flow.set(\"contador\", 0)\n    flow.set(\"leitura\", [])\n    node.warn(\"Periodicas 2\");\n    node.warn(new Date().getTime());\n    return msg;\n}",
+        "func": "let json = new Array();\n\nlet leitura = flow.get('leitura');\nlet TipConexao = global.get('TipConexaoVar');\nlet CodVariavelLeitura = global.get('CodVariavelLeituraVar');\nlet ValMuitoBaixo = global.get('ValMuitoBaixoVar');\nlet ValBaixo = global.get('ValBaixoVar');\nlet ValAlto = global.get('ValAltoVar');\nlet ValMuitoAlto = global.get('ValMuitoAltoVar');\nlet NumCasasDecimais = global.get('NumCasasDecimaisVar');\nlet ValEscala = global.get('ValEscalaVar');\nlet CodUnidadeEmpresa = global.get('CodUnidadeEmpresaVar');\nlet TipAlarmeDigital = global.get('TipAlarmeDigitalVar');\nlet TipVariavelLeitura = global.get('TipVariavelLeituraVar');\nlet TipMonitoracaoPeriodico = global.get('TipMonitoracaoPeriodicoVar');\n\nvar hora = flow.get('hora');\nvar data = msg.payload;\n\nconst DataAtualHoraNova = hora;\nconst DataVariavelLeituraHoraNova = hora;\nconst DataVariavelLeituraDiaNova = data;\n\nflow.set(\"DataVariavelLeituraHoraNova\", DataVariavelLeituraHoraNova);\nflow.set(\"DataVariavelLeituraDiaNova\", DataVariavelLeituraDiaNova);\nflow.set(\"DataAtualHoraNova\", DataAtualHoraNova);\n\nlet posLeiturasPeriodicas = flow.get('posLeiturasPeriodicas');\n\nlet TipFuncionando = global.get('TipFuncionandoVar');\nlet CodAreaProcessoAPF = global.get('CodAreaProcessoAPF');\nlet CodAreaProcesso = global.get('CodAreaProcessoVar');\n\nlet escreveu = false;\n\nif (posLeiturasPeriodicas != null && msg.payload != null)\n{   \n    if (TipVariavelLeitura[posLeiturasPeriodicas] == 1 || TipVariavelLeitura[posLeiturasPeriodicas] == 2)\n    {\n        leitura = leitura.toFixed(NumCasasDecimais[posLeiturasPeriodicas]);\n\n        ValMuitoBaixo[posLeiturasPeriodicas] = ValMuitoBaixo[posLeiturasPeriodicas].toFixed(NumCasasDecimais[posLeiturasPeriodicas]);\n        ValBaixo[posLeiturasPeriodicas] = ValBaixo[posLeiturasPeriodicas].toFixed(NumCasasDecimais[posLeiturasPeriodicas]);\n        ValAlto[posLeiturasPeriodicas] = ValAlto[posLeiturasPeriodicas].toFixed(NumCasasDecimais[posLeiturasPeriodicas]);\n        ValMuitoAlto[posLeiturasPeriodicas] = ValMuitoAlto[posLeiturasPeriodicas].toFixed(NumCasasDecimais[posLeiturasPeriodicas]);\n\n        if (CodAreaProcesso[posLeiturasPeriodicas] == CodAreaProcessoAPF[posLeiturasPeriodicas]) \n        {\n            TipFuncionando[posLeiturasPeriodicas] = true;\n        }\n\n        json.push({\n            \"CodVariavelLeitura\": CodVariavelLeitura[posLeiturasPeriodicas],\n            \"ValMuitoBaixo\": ValMuitoBaixo[posLeiturasPeriodicas],\n            \"ValBaixo\": ValBaixo[posLeiturasPeriodicas],\n            \"ValVariavelLeitura\": leitura,\n            \"ValVariavelLeituraString\": null,\n            \"ValAlto\": ValAlto[posLeiturasPeriodicas],\n            \"ValMuitoAlto\": ValMuitoAlto[posLeiturasPeriodicas],\n            \"TipFuncionando\": TipFuncionando[posLeiturasPeriodicas],\n            \"DataVariavelLeitura\": DataVariavelLeituraDiaNova,\n            \"TipMonitoracaoPeriodico\": TipMonitoracaoPeriodico[posLeiturasPeriodicas]\n        });\n\n    } else if (TipVariavelLeitura[posLeiturasPeriodicas] == 3 || TipVariavelLeitura[posLeiturasPeriodicas] == 4) {\n        node.warn(leitura)\n        json.push({\n            \"CodVariavelLeitura\": CodVariavelLeitura[posLeiturasPeriodicas],\n            \"ValMuitoBaixo\": ValMuitoBaixo[posLeiturasPeriodicas],\n            \"ValBaixo\": ValBaixo[posLeiturasPeriodicas],\n            \"ValVariavelLeitura\": null,\n            \"ValVariavelLeituraString\": leitura,\n            \"ValAlto\": ValAlto[posLeiturasPeriodicas],\n            \"ValMuitoAlto\": ValMuitoAlto[posLeiturasPeriodicas],\n            \"TipFuncionando\": TipFuncionando[posLeiturasPeriodicas],\n            \"DataVariavelLeituraDia\": DataVariavelLeituraDiaNova,\n            \"TipMonitoracaoPeriodico\": TipMonitoracaoPeriodico[posLeiturasPeriodicas]\n        });\n    }\n}\n\nmsg.payload = json;\nif(msg.payload != \"\")\n{\n    escreveu = true\n    flow.set(\"escreveu\", escreveu);\n    flow.set(\"contador\", 0)\n    flow.set(\"leitura\", [])\n    node.warn(\"Periodicas Siemens 2\");\n    node.warn(new Date().getTime());\n    return msg;\n}",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -3328,7 +3101,7 @@
         "type": "function",
         "z": "95a58997dc14a3e1",
         "name": "Verifica se o tempo estourou",
-        "func": "let DataVariavelLeituraDiaAntiga = global.get('DataVariavelLeituraDiaAntiga');\nlet TipUnidadePeriodo = global.get('TipUnidadePeriodo');\nlet ValPeriodo = global.get('ValPeriodo');\nlet tempo = [];\nlet posLeiturasPeriodicas = \"\";\nvar d = new Date();\nlet antiga = [];\nlet aguarda = flow.get('aguarda') || false;\nlet posIgnore = global.get('posIgnore');\nlet pos = [];\n\n// Codigo das variaveis a serem lidas periodicamente\nvar CodVar = global.get('CodVariavelLeituraVar');\nvar CodVarDI = global.get('CodVarDI');\nvar Host = global.get('Host');\nvar TipConexao = global.get('TipConexao');\nvar CPUSlot = global.get('CPUSlot');\nvar EthernetSlot = global.get('EthernetSlot');\nvar TagName = global.get('TagName');\nvar ProgName = global.get('ProgName');\nvar DataType = global.get('DataType');\nvar CodVarDI = global.get('CodVarDI');\nvar CodVariavelLeitura = global.get('CodVariavelLeitura');\nvar TipVariavelLeitura = global.get('TipVariavelLeitura');\n\nlet ins = {};\nlet key = 0;\n\nfor(let i in TipUnidadePeriodo)\n{\n    antiga[i] = new Date(Date.parse(DataVariavelLeituraDiaAntiga[i]));\n    switch(TipUnidadePeriodo[i])\n    {\n        case 1: // segundo\n            antiga[i].setSeconds(antiga[i].getSeconds() + ValPeriodo[i]);\n            break;\n        case 2: // minuto\n            antiga[i].setMinutes(antiga[i].getMinutes() + ValPeriodo[i]);\n            break;\n        case 3: // hora\n            antiga[i].setHours(antiga[i].getHours() + ValPeriodo[i]);\n            break;\n    }\n}\n\nif(tempo != null)\n{\n    for(let i in DataVariavelLeituraDiaAntiga)\n    {\n        if (TipConexao[i] == \"ROCKWELL\") \n        {\n            if(antiga[i] <= d.getTime())\n            {\n                pos = i;\n            }\n        }\n    }\n}\n\nif(pos != null)\n{\n    if (!posIgnore.includes(pos)) \n    {\n        posLeiturasPeriodicas = pos;\n        ins[0] = [{ \n            \"delta\": key,\n            \"name\": Host[posLeiturasPeriodicas],\n            \"ip\": Host[posLeiturasPeriodicas],\n            \"cpuslot\": CPUSlot[posLeiturasPeriodicas],\n            \"ethernetslot\": EthernetSlot[posLeiturasPeriodicas],\n            \"tag\": TagName[posLeiturasPeriodicas],\n            \"prog\": ProgName[posLeiturasPeriodicas],\n            \"datatype\": DataType[posLeiturasPeriodicas],\n        }]\n        key++\n    }\n}\n\nkey = 0\nflow.set(\"posLeiturasPeriodicas\", posLeiturasPeriodicas);\n\nif(posLeiturasPeriodicas != \"\" && aguarda == false){\n    msg.payload = ins\n    flow.set(\"conta\", 0);\n    node.warn(\"Periodicas 1\");\n    node.warn(new Date().getTime());\n    return msg\n}",
+        "func": "let DataVariavelLeituraDiaAntiga = global.get('DataVariavelLeituraDiaAntiga');\nlet TipUnidadePeriodo = global.get('TipUnidadePeriodo');\nlet ValPeriodo = global.get('ValPeriodo');\nlet tempo = [];\nlet posLeiturasPeriodicas = \"\";\nvar d = new Date();\nlet antiga = [];\nlet aguarda = flow.get('aguarda') || false;\nlet posIgnore = global.get('posIgnore');\nlet pos = [];\n\n// Codigo das variaveis a serem lidas periodicamente\nvar CodVar = global.get('CodVariavelLeituraVar');\nvar CodVarDI = global.get('CodVarDI');\nvar Host = global.get('Host');\nvar TipConexao = global.get('TipConexao');\nvar CPUSlot = global.get('CPUSlot');\nvar EthernetSlot = global.get('EthernetSlot');\nvar TagName = global.get('TagName');\nvar ProgName = global.get('ProgName');\nvar DataType = global.get('DataType');\nvar CodVarDI = global.get('CodVarDI');\nvar CodVariavelLeitura = global.get('CodVariavelLeitura');\nvar TipVariavelLeitura = global.get('TipVariavelLeitura');\n\nlet ins = {};\nlet key = 0;\n\nfor(let i in TipUnidadePeriodo)\n{\n    antiga[i] = new Date(Date.parse(DataVariavelLeituraDiaAntiga[i]));\n    switch(TipUnidadePeriodo[i])\n    {\n        case 1: // segundo\n            antiga[i].setSeconds(antiga[i].getSeconds() + ValPeriodo[i]);\n            break;\n        case 2: // minuto\n            antiga[i].setMinutes(antiga[i].getMinutes() + ValPeriodo[i]);\n            break;\n        case 3: // hora\n            antiga[i].setHours(antiga[i].getHours() + ValPeriodo[i]);\n            break;\n    }\n}\n\nif(tempo != null)\n{\n    for(let i in DataVariavelLeituraDiaAntiga)\n    {\n        if (TipConexao[i] == \"ROCKWELL\") \n        {\n            if(antiga[i] <= d.getTime())\n            {\n                pos = i;\n            }\n        }\n    }\n}\n\nif(pos != null)\n{\n    if (!posIgnore.includes(pos)) \n    {\n        posLeiturasPeriodicas = pos;\n        ins[0] = [{ \n            \"delta\": key,\n            \"name\": Host[posLeiturasPeriodicas],\n            \"ip\": Host[posLeiturasPeriodicas],\n            \"cpuslot\": CPUSlot[posLeiturasPeriodicas],\n            \"ethernetslot\": EthernetSlot[posLeiturasPeriodicas],\n            \"tag\": TagName[posLeiturasPeriodicas],\n            \"prog\": ProgName[posLeiturasPeriodicas],\n            \"datatype\": DataType[posLeiturasPeriodicas],\n        }]\n        key++\n    }\n}\n\nkey = 0\nflow.set(\"posLeiturasPeriodicas\", posLeiturasPeriodicas);\n\nif(posLeiturasPeriodicas != \"\" && aguarda == false){\n    msg.payload = ins\n    flow.set(\"conta\", 0);\n    node.warn(\"Periodicas Rockwell 1\");\n    node.warn(new Date().getTime());\n    return msg\n}",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -3367,7 +3140,7 @@
         "type": "function",
         "z": "95a58997dc14a3e1",
         "name": "forEach st-ethernet-ip",
-        "func": "let posLeiturasPeriodicas = flow.get(\"posLeiturasPeriodicas\");\nvar devices = msg.payload;\nflow.set(\"aguarda\", true);\nflow.set(\"periodica\", true);\n\nmsg = [];\n\ndevices.forEach((/** @type {{ modbus_id: any; modbus_ip: any; modbus_port: any; address: any; quantity: any; }} */ dev) => {\n   const { Controller, Tag, EthernetIP } = global.get(\"ethernetip\");\n   const { DINT, SINT, INT, BOOL, REAL } = EthernetIP.CIP.DataTypes.Types;\n\n   const PLC = new Controller(false, { unconnectedSendTimeout: 5064 });\n\n   switch (dev.datatype) {\n      case \"DINT\":\n         {\n            var tag = new Tag(dev.tag, dev.prog, DINT);\n            break;\n         }\n      case \"SINT\":\n         {\n            var tag = new Tag(dev.tag, dev.prog, SINT);\n            break;\n         }\n      case \"INT\":\n         {\n            var tag = new Tag(dev.tag, dev.prog, INT);\n            break;\n         }\n      case \"BOOL\":\n         {\n            var tag = new Tag(dev.tag, dev.prog, BOOL);\n            break;\n         }\n      case \"REAL\":\n         {\n            var tag = new Tag(dev.tag, dev.prog, REAL);\n            break;\n         }\n\n   }\n\n   PLC.connect(dev.ip, dev.cpuslot, dev.ethernetslot).then(async () => {\n      await PLC.readTag(tag);\n\n      console.log(tag.value);\n      node.send({\n         \"topic\": \"Ethernet/IP Response\",\n         \"host\": dev.ip,\n         \"cpu\": dev.cpuslot,\n         \"ethernet\": dev.ethernetslot,\n         \"tag\": dev.tag,\n         \"prog\": dev.prog,\n         \"type\": dev.datatype,\n         \"payload\": tag.value\n      });\n      PLC.disconnect(dev.ip, dev.cpuslot, dev.ethernetslot);\n      PLC.destroy();\n   });\n});\n\nreturn msg;",
+        "func": "let posLeiturasPeriodicas = flow.get(\"posLeiturasPeriodicas\");\nvar devices = msg.payload;\nflow.set(\"aguarda\", true);\nflow.set(\"periodica\", true);\n\nmsg = [];\n\ndevices.forEach((/** @type {{ modbus_id: any; modbus_ip: any; modbus_port: any; address: any; quantity: any; }} */ dev) => {\n   const { Controller, Tag, EthernetIP } = global.get(\"ethernetip\");\n   const { DINT, SINT, INT, BOOL, REAL } = EthernetIP.CIP.DataTypes.Types;\n\n   const PLC = new Controller(false, { unconnectedSendTimeout: 5064 });\n\n   switch (dev.datatype) {\n      case \"DINT\":\n         {\n            var tag = new Tag(dev.tag, dev.prog, DINT);\n            break;\n         }\n      case \"SINT\":\n         {\n            var tag = new Tag(dev.tag, dev.prog, SINT);\n            break;\n         }\n      case \"INT\":\n         {\n            var tag = new Tag(dev.tag, dev.prog, INT);\n            break;\n         }\n      case \"BOOL\":\n         {\n            var tag = new Tag(dev.tag, dev.prog, BOOL);\n            break;\n         }\n      case \"REAL\":\n         {\n            var tag = new Tag(dev.tag, dev.prog, REAL);\n            break;\n         }\n\n   }\n\n   PLC.connect(dev.ip, dev.cpuslot, dev.ethernetslot).then(async () => {\n      await PLC.readTag(tag);\n\n      console.log(tag.value);\n      node.send({\n         \"topic\": \"Ethernet/IP Response\",\n         \"host\": dev.ip,\n         \"cpu\": dev.cpuslot,\n         \"ethernet\": dev.ethernetslot,\n         \"tag\": dev.tag,\n         \"prog\": dev.prog,\n         \"type\": dev.datatype,\n         \"payload\": tag.value\n      });\n      PLC.disconnect(dev.ip, dev.cpuslot, dev.ethernetslot);\n      PLC.destroy();\n   }).catch(err => {\n      console.log(err);\n      node.error({\n         \"ip\": dev.ip,\n         \"message\": \"ERRO! Falha na leitura do host \" + dev.ip + \"!\",\n         \"error\": err.code\n      });\n   });\n});\n\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -3511,7 +3284,7 @@
         "type": "function",
         "z": "95a58997dc14a3e1",
         "name": "Modifica o payload saida",
-        "func": "let json = new Array();\n\nlet leitura = flow.get('leitura');\nlet TipConexao = global.get('TipConexaoVar');\nlet CodVariavelLeitura = global.get('CodVariavelLeituraVar');\nlet ValMuitoBaixo = global.get('ValMuitoBaixoVar');\nlet ValBaixo = global.get('ValBaixoVar');\nlet ValAlto = global.get('ValAltoVar');\nlet ValMuitoAlto = global.get('ValMuitoAltoVar');\nlet NumCasasDecimais = global.get('NumCasasDecimaisVar');\nlet ValEscala = global.get('ValEscalaVar');\nlet CodUnidadeEmpresa = global.get('CodUnidadeEmpresaVar');\nlet TipAlarmeDigital = global.get('TipAlarmeDigitalVar');\nlet TipVariavelLeitura = global.get('TipVariavelLeituraVar');\nlet TipMonitoracaoPeriodico = global.get('TipMonitoracaoPeriodicoVar');\n\nvar hora = flow.get('hora');\nvar data = msg.payload;\n\nconst DataAtualHoraNova = hora;\nconst DataVariavelLeituraHoraNova = hora;\nconst DataVariavelLeituraDiaNova = data;\n\nflow.set(\"DataVariavelLeituraHoraNova\", DataVariavelLeituraHoraNova);\nflow.set(\"DataVariavelLeituraDiaNova\", DataVariavelLeituraDiaNova);\nflow.set(\"DataAtualHoraNova\", DataAtualHoraNova);\n\nlet posLeiturasPeriodicas = flow.get('posLeiturasPeriodicas');\n\nlet TipFuncionando = global.get('TipFuncionandoVar');\nlet CodAreaProcessoAPF = global.get('CodAreaProcessoAPF');\nlet CodAreaProcesso = global.get('CodAreaProcessoVar');\n\nlet escreveu = false;\n\nif (posLeiturasPeriodicas != null && msg.payload != null)\n{   \n    if (TipVariavelLeitura[posLeiturasPeriodicas] == 1 || TipVariavelLeitura[posLeiturasPeriodicas] == 2)\n    {\n        leitura = leitura.toFixed(NumCasasDecimais[posLeiturasPeriodicas]);\n\n        ValMuitoBaixo[posLeiturasPeriodicas] = ValMuitoBaixo[posLeiturasPeriodicas].toFixed(NumCasasDecimais[posLeiturasPeriodicas]);\n        ValBaixo[posLeiturasPeriodicas] = ValBaixo[posLeiturasPeriodicas].toFixed(NumCasasDecimais[posLeiturasPeriodicas]);\n        ValAlto[posLeiturasPeriodicas] = ValAlto[posLeiturasPeriodicas].toFixed(NumCasasDecimais[posLeiturasPeriodicas]);\n        ValMuitoAlto[posLeiturasPeriodicas] = ValMuitoAlto[posLeiturasPeriodicas].toFixed(NumCasasDecimais[posLeiturasPeriodicas]);\n\n        if (CodAreaProcesso[posLeiturasPeriodicas] == CodAreaProcessoAPF[posLeiturasPeriodicas]) \n        {\n            TipFuncionando[posLeiturasPeriodicas] = true;\n        }\n\n        json.push({\n            \"CodVariavelLeitura\": CodVariavelLeitura[posLeiturasPeriodicas],\n            \"ValMuitoBaixo\": ValMuitoBaixo[posLeiturasPeriodicas],\n            \"ValBaixo\": ValBaixo[posLeiturasPeriodicas],\n            \"ValVariavelLeitura\": leitura,\n            \"ValVariavelLeituraString\": null,\n            \"ValAlto\": ValAlto[posLeiturasPeriodicas],\n            \"ValMuitoAlto\": ValMuitoAlto[posLeiturasPeriodicas],\n            \"TipFuncionando\": TipFuncionando[posLeiturasPeriodicas],\n            \"DataVariavelLeitura\": DataVariavelLeituraDiaNova,\n            \"TipMonitoracaoPeriodico\": TipMonitoracaoPeriodico[posLeiturasPeriodicas]\n        });\n\n    } else if (TipVariavelLeitura[posLeiturasPeriodicas] == 3 || TipVariavelLeitura[posLeiturasPeriodicas] == 4) {\n        node.warn(leitura)\n        json.push({\n            \"CodVariavelLeitura\": CodVariavelLeitura[posLeiturasPeriodicas],\n            \"ValMuitoBaixo\": ValMuitoBaixo[posLeiturasPeriodicas],\n            \"ValBaixo\": ValBaixo[posLeiturasPeriodicas],\n            \"ValVariavelLeitura\": null,\n            \"ValVariavelLeituraString\": leitura,\n            \"ValAlto\": ValAlto[posLeiturasPeriodicas],\n            \"ValMuitoAlto\": ValMuitoAlto[posLeiturasPeriodicas],\n            \"TipFuncionando\": TipFuncionando[posLeiturasPeriodicas],\n            \"DataVariavelLeituraDia\": DataVariavelLeituraDiaNova,\n            \"TipMonitoracaoPeriodico\": TipMonitoracaoPeriodico[posLeiturasPeriodicas]\n        });\n    }\n}\n\nmsg.payload = json;\nif(msg.payload != \"\")\n{\n    escreveu = true\n    flow.set(\"escreveu\", escreveu);\n    flow.set(\"contador\", 0)\n    flow.set(\"leitura\", [])\n    node.warn(\"Periodicas 2\");\n    node.warn(new Date().getTime());\n    return msg;\n}",
+        "func": "let json = new Array();\n\nlet leitura = flow.get('leitura');\nlet TipConexao = global.get('TipConexaoVar');\nlet CodVariavelLeitura = global.get('CodVariavelLeituraVar');\nlet ValMuitoBaixo = global.get('ValMuitoBaixoVar');\nlet ValBaixo = global.get('ValBaixoVar');\nlet ValAlto = global.get('ValAltoVar');\nlet ValMuitoAlto = global.get('ValMuitoAltoVar');\nlet NumCasasDecimais = global.get('NumCasasDecimaisVar');\nlet ValEscala = global.get('ValEscalaVar');\nlet CodUnidadeEmpresa = global.get('CodUnidadeEmpresaVar');\nlet TipAlarmeDigital = global.get('TipAlarmeDigitalVar');\nlet TipVariavelLeitura = global.get('TipVariavelLeituraVar');\nlet TipMonitoracaoPeriodico = global.get('TipMonitoracaoPeriodicoVar');\n\nvar hora = flow.get('hora');\nvar data = msg.payload;\n\nconst DataAtualHoraNova = hora;\nconst DataVariavelLeituraHoraNova = hora;\nconst DataVariavelLeituraDiaNova = data;\n\nflow.set(\"DataVariavelLeituraHoraNova\", DataVariavelLeituraHoraNova);\nflow.set(\"DataVariavelLeituraDiaNova\", DataVariavelLeituraDiaNova);\nflow.set(\"DataAtualHoraNova\", DataAtualHoraNova);\n\nlet posLeiturasPeriodicas = flow.get('posLeiturasPeriodicas');\n\nlet TipFuncionando = global.get('TipFuncionandoVar');\nlet CodAreaProcessoAPF = global.get('CodAreaProcessoAPF');\nlet CodAreaProcesso = global.get('CodAreaProcessoVar');\n\nlet escreveu = false;\n\nif (posLeiturasPeriodicas != null && msg.payload != null)\n{   \n    if (TipVariavelLeitura[posLeiturasPeriodicas] == 1 || TipVariavelLeitura[posLeiturasPeriodicas] == 2)\n    {\n        leitura = leitura.toFixed(NumCasasDecimais[posLeiturasPeriodicas]);\n\n        ValMuitoBaixo[posLeiturasPeriodicas] = ValMuitoBaixo[posLeiturasPeriodicas].toFixed(NumCasasDecimais[posLeiturasPeriodicas]);\n        ValBaixo[posLeiturasPeriodicas] = ValBaixo[posLeiturasPeriodicas].toFixed(NumCasasDecimais[posLeiturasPeriodicas]);\n        ValAlto[posLeiturasPeriodicas] = ValAlto[posLeiturasPeriodicas].toFixed(NumCasasDecimais[posLeiturasPeriodicas]);\n        ValMuitoAlto[posLeiturasPeriodicas] = ValMuitoAlto[posLeiturasPeriodicas].toFixed(NumCasasDecimais[posLeiturasPeriodicas]);\n\n        if (CodAreaProcesso[posLeiturasPeriodicas] == CodAreaProcessoAPF[posLeiturasPeriodicas]) \n        {\n            TipFuncionando[posLeiturasPeriodicas] = true;\n        }\n\n        json.push({\n            \"CodVariavelLeitura\": CodVariavelLeitura[posLeiturasPeriodicas],\n            \"ValMuitoBaixo\": ValMuitoBaixo[posLeiturasPeriodicas],\n            \"ValBaixo\": ValBaixo[posLeiturasPeriodicas],\n            \"ValVariavelLeitura\": leitura,\n            \"ValVariavelLeituraString\": null,\n            \"ValAlto\": ValAlto[posLeiturasPeriodicas],\n            \"ValMuitoAlto\": ValMuitoAlto[posLeiturasPeriodicas],\n            \"TipFuncionando\": TipFuncionando[posLeiturasPeriodicas],\n            \"DataVariavelLeitura\": DataVariavelLeituraDiaNova,\n            \"TipMonitoracaoPeriodico\": TipMonitoracaoPeriodico[posLeiturasPeriodicas]\n        });\n\n    } else if (TipVariavelLeitura[posLeiturasPeriodicas] == 3 || TipVariavelLeitura[posLeiturasPeriodicas] == 4) {\n        node.warn(leitura)\n        json.push({\n            \"CodVariavelLeitura\": CodVariavelLeitura[posLeiturasPeriodicas],\n            \"ValMuitoBaixo\": ValMuitoBaixo[posLeiturasPeriodicas],\n            \"ValBaixo\": ValBaixo[posLeiturasPeriodicas],\n            \"ValVariavelLeitura\": null,\n            \"ValVariavelLeituraString\": leitura,\n            \"ValAlto\": ValAlto[posLeiturasPeriodicas],\n            \"ValMuitoAlto\": ValMuitoAlto[posLeiturasPeriodicas],\n            \"TipFuncionando\": TipFuncionando[posLeiturasPeriodicas],\n            \"DataVariavelLeituraDia\": DataVariavelLeituraDiaNova,\n            \"TipMonitoracaoPeriodico\": TipMonitoracaoPeriodico[posLeiturasPeriodicas]\n        });\n    }\n}\n\nmsg.payload = json;\nif(msg.payload != \"\")\n{\n    escreveu = true\n    flow.set(\"escreveu\", escreveu);\n    flow.set(\"contador\", 0)\n    flow.set(\"leitura\", [])\n    node.warn(\"Periodicas Rockwell 2\");\n    node.warn(new Date().getTime());\n    return msg;\n}",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
