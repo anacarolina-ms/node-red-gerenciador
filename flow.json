@@ -418,7 +418,7 @@
         "type": "function",
         "z": "f8a25b208ccc25c0",
         "name": "forEach Modbus",
-        "func": "let periodica = flow.get('periodica')\n\nvar devices = msg.payload;\nflow.set(\"aguarda2\", true);\n\nmsg = [];\nif(periodica != true)\n{\n    devices.forEach((/** @type {{ modbus_id: any; modbus_ip: any; modbus_port: any; address: any; quantity: any; }} */ dev) => {\n        let m_response = \"\";\n        let Modbus = global.get('jsmodbus');\n        let net = global.get('net');\n        let socket = new net.Socket();\n        let client = new Modbus.client.TCP(socket, dev.modbus_id);\n        let options =\n        {\n            host: dev.modbus_ip,\n            port: dev.modbus_port,\n            retryTime: 50,\n            retryAlways: false\n        };\n        let Reconnect = global.get('nodenetreconnect');\n        let recon = new Reconnect(socket, options);\n        socket.setTimeout(3000);\n        socket.on('connect', function () {\n            // if comparando o FC (dev.functioncode)\n            // if FC == 3\n            client\n                .readHoldingRegisters(dev.address, dev.quantity)\n                .then(function (resp) {\n                    m_response = parseFloat(resp.response._body._values);\n                    node.send({\n                        \"topic\": \"Modbus Response\",\n                        \"unitid\": dev.modbus_id,\n                        \"host\": dev.modbus_ip,\n                        \"port\": dev.modbus_port,\n                        \"address\": dev.address,\n                        \"quantity\": dev.quantity,\n                        \"payload\": m_response\n                    });\n                    socket.end();\n                    recon.end();\n                });\n            socket.end();\n            recon.end();\n        }, console.error);\n\n        socket.on('timeout', () => {\n            console.log('socket timeout');\n            recon.end();\n            socket.end();\n        });\n\n        socket.on('error', function (err) {\n            if (err.code != \"ECONNRESET\") {\n                node.error({\n                    \"ip\": dev.modbus_ip,\n                    \"port\": dev.modbus_port,\n                    \"message\": \"ERRO! Falha na leitura do host \" + dev.modbus_ip + \"!\",\n                    \"error\": err.code\n                });\n                socket.end();\n                recon.end();\n            }\n            socket.end();\n            recon.end();\n        });\n        socket.connect(options);\n    });\n}\nreturn msg;",
+        "func": "let periodica = flow.get('periodica')\n\nvar devices = msg.payload;\nflow.set(\"aguarda2\", true);\n\nmsg = [];\nif(periodica != true)\n{\n    devices.forEach((/** @type {{ modbus_id: any; modbus_ip: any; modbus_port: any; address: any; quantity: any; }} */ dev) => {\n        let m_response = \"\";\n        let Modbus = global.get('jsmodbus');\n        let net = global.get('net');\n        let socket = new net.Socket();\n        let client = new Modbus.client.TCP(socket, dev.modbus_id);\n        let options =\n        {\n            host: dev.modbus_ip,\n            port: dev.modbus_port,\n            retryTime: 50,\n            retryAlways: false\n        };\n        let Reconnect = global.get('nodenetreconnect');\n        let recon = new Reconnect(socket, options);\n        socket.setTimeout(3000);\n        socket.on('connect', function () {\n            // if comparando o FC (dev.functioncode)\n            // if FC == 3\n            client\n                .readHoldingRegisters(dev.address, dev.quantity)\n                .then(function (resp) {\n                    m_response = parseFloat(resp.response._body._values);\n                    node.send({\n                        \"topic\": \"Modbus Response\",\n                        \"unitid\": dev.modbus_id,\n                        \"host\": dev.modbus_ip,\n                        \"port\": dev.modbus_port,\n                        \"address\": dev.address,\n                        \"quantity\": dev.quantity,\n                        \"payload\": m_response\n                    });\n                    socket.end();\n                    recon.end();\n                    net.Socket('close');\n                });\n            socket.end();\n            recon.end();\n            net.Socket('close');\n        }, console.error);\n\n        socket.on('timeout', () => {\n            console.log('socket timeout');\n            recon.end();\n            socket.end();\n            net.Socket('close');\n        });\n\n        socket.on('error', function (err) {\n            if (err.code != \"ECONNRESET\") {\n                node.error({\n                    \"ip\": dev.modbus_ip,\n                    \"port\": dev.modbus_port,\n                    \"message\": \"ERRO! Falha na leitura do host \" + dev.modbus_ip + \"!\",\n                    \"error\": err.code\n                });\n                socket.end();\n                recon.end();\n                net.Socket('close');\n            }\n            socket.end();\n            recon.end();\n            net.Socket('close');\n        });\n        socket.connect(options);\n    });\n}\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -587,29 +587,13 @@
         "type": "function",
         "z": "f8a25b208ccc25c0",
         "name": "Modifica o payload saida",
-        "func": "let json = new Array();\n\nlet leitura2 = flow.get('leitura2');\nlet TipConexao = global.get('TipConexaoVar');\nlet CodVariavelLeitura = global.get('CodVariavelLeituraVar');\nlet ValMuitoBaixo = global.get('ValMuitoBaixoVar');\nlet ValBaixo = global.get('ValBaixoVar');\nlet ValAlto = global.get('ValAltoVar');\nlet ValMuitoAlto = global.get('ValMuitoAltoVar');\nlet NumCasasDecimais = global.get('NumCasasDecimaisVar');\nlet ValEscala = global.get('ValEscalaVar');\nlet CodUnidadeEmpresa = global.get('CodUnidadeEmpresaVar');\nlet TipAlarmeDigital = global.get('TipAlarmeDigitalVar');\nlet TipVariavelLeitura = global.get('TipVariavelLeituraVar');\nlet TipMonitoracaoPeriodico = global.get('TipMonitoracaoPeriodicoVar');\nlet posEventosLeitura = flow.get('posEventosLeitura');\n\nvar hora = flow.get('hora2');\nvar data = msg.payload;\n\nconst DataAtualHoraNova = hora;\nconst DataVariavelLeituraHoraNova = hora;\nconst DataVariavelLeituraDiaNova = data;\n\nflow.set(\"DataVariavelLeituraHoraNova2\", DataVariavelLeituraHoraNova);\nflow.set(\"DataVariavelLeituraDiaNova2\", DataVariavelLeituraDiaNova);\nflow.set(\"DataAtualHoraNova2\", DataAtualHoraNova);\n\nlet TipFuncionando = global.get('TipFuncionandoVar');\nlet CodAreaProcessoAPF = global.get('CodAreaProcessoAPF');\nlet CodAreaProcesso = global.get('CodAreaProcessoVar');\n\nlet escreveu2 = false;\n\nif(posEventosLeitura != null && msg.payload != null)\n{\n    for(let key in posEventosLeitura)\n    {\n        if(TipVariavelLeitura[posEventosLeitura[key]] == 1 || TipVariavelLeitura[posEventosLeitura[key]] == 2)\n        {\n            if(leitura2.length > 1)\n            {\n                for(let pos in leitura2)\n                {\n                    leitura2[pos] = leitura2[pos].toFixed(NumCasasDecimais[posEventosLeitura[key]]);\n                }\n            } else\n            {\n                leitura2 = leitura2[0].toFixed(NumCasasDecimais[posEventosLeitura[key]]);\n            }\n\n            ValMuitoBaixo[posEventosLeitura[key]] = ValMuitoBaixo[posEventosLeitura[key]].toFixed(NumCasasDecimais[posEventosLeitura[key]]);\n            ValBaixo[posEventosLeitura[key]] = ValBaixo[posEventosLeitura[key]].toFixed(NumCasasDecimais[posEventosLeitura[key]]);\n            ValAlto[posEventosLeitura[key]] = ValAlto[posEventosLeitura[key]].toFixed(NumCasasDecimais[posEventosLeitura[key]]);\n            ValMuitoAlto[posEventosLeitura[key]] = ValMuitoAlto[posEventosLeitura[key]].toFixed(NumCasasDecimais[posEventosLeitura[key]]);\n\n            if (CodAreaProcesso[posEventosLeitura[key]] == CodAreaProcessoAPF[posEventosLeitura[key]]) {\n                TipFuncionando[posEventosLeitura[key]] = true\n            }\n            \n            json.push({\n                \"CodVariavelLeitura\": CodVariavelLeitura[posEventosLeitura[key]],\n                \"ValMuitoBaixo\": ValMuitoBaixo[posEventosLeitura[key]],\n                \"ValBaixo\": ValBaixo[posEventosLeitura[key]],\n                \"ValVariavelLeitura\": leitura2,\n                \"ValVariavelLeituraString\": null,\n                \"ValAlto\": ValAlto[posEventosLeitura[key]],\n                \"ValMuitoAlto\": ValMuitoAlto[posEventosLeitura[key]],\n                \"TipFuncionando\": TipFuncionando[posEventosLeitura[key]],\n                \"DataVariavelLeitura\": DataVariavelLeituraDiaNova,\n                \"TipMonitoracaoPeriodico\": TipMonitoracaoPeriodico[posEventosLeitura[key]]\n            });\n        } else if(TipVariavelLeitura[posEventosLeitura[key]] == 3 || TipVariavelLeitura[posEventosLeitura[key]] == 4) \n        {\n            json.push({\n                \"CodVariavelLeitura\": CodVariavelLeitura[posEventosLeitura[key]],\n                \"ValMuitoBaixo\": ValMuitoBaixo[posEventosLeitura[key]],\n                \"ValBaixo\": ValBaixo[posEventosLeitura[key]],\n                \"ValVariavelLeitura\": null,\n                \"ValVariavelLeituraString\": leitura2,\n                \"ValAlto\": ValAlto[posEventosLeitura[key]],\n                \"ValMuitoAlto\": ValMuitoAlto[posEventosLeitura[key]],\n                \"TipFuncionando\": TipFuncionando[posEventosLeitura[key]],\n                \"DataVariavelLeituraDia\": DataVariavelLeituraDiaNova,\n                \"TipMonitoracaoPeriodico\": TipMonitoracaoPeriodico[posEventosLeitura[key]]\n            });\n        }\n    }\n}\n\nmsg.payload = json\nif(msg.payload != \"\"){\n    escreveu2 = true\n    flow.set(\"escreveu2\", escreveu2)\n    node.warn(\"Eventos 2\");\n    node.warn(new Date().getTime());\n    return msg\n}",
+        "func": "let json = new Array();\n\nlet leitura2 = flow.get('leitura2');\nlet TipConexao = global.get('TipConexaoVar');\nlet CodVariavelLeitura = global.get('CodVariavelLeituraVar');\nlet ValMuitoBaixo = global.get('ValMuitoBaixoVar');\nlet ValBaixo = global.get('ValBaixoVar');\nlet ValAlto = global.get('ValAltoVar');\nlet ValMuitoAlto = global.get('ValMuitoAltoVar');\nlet NumCasasDecimais = global.get('NumCasasDecimaisVar');\nlet ValEscala = global.get('ValEscalaVar');\nlet CodUnidadeEmpresa = global.get('CodUnidadeEmpresaVar');\nlet TipAlarmeDigital = global.get('TipAlarmeDigitalVar');\nlet TipVariavelLeitura = global.get('TipVariavelLeituraVar');\nlet TipMonitoracaoPeriodico = global.get('TipMonitoracaoPeriodicoVar');\nlet posEventosLeitura = flow.get('posEventosLeitura');\n\nvar hora = flow.get('hora2');\nvar data = msg.payload;\n\nconst DataAtualHoraNova = hora;\nconst DataVariavelLeituraHoraNova = hora;\nconst DataVariavelLeituraDiaNova = data;\n\nflow.set(\"DataVariavelLeituraHoraNova2\", DataVariavelLeituraHoraNova);\nflow.set(\"DataVariavelLeituraDiaNova2\", DataVariavelLeituraDiaNova);\nflow.set(\"DataAtualHoraNova2\", DataAtualHoraNova);\n\nlet TipFuncionando = global.get('TipFuncionandoVar');\nlet CodAreaProcessoAPF = global.get('CodAreaProcessoAPF');\nlet CodAreaProcesso = global.get('CodAreaProcessoVar');\n\nlet escreveu2 = false;\n\nif(posEventosLeitura != null && msg.payload != null)\n{\n    for(let key in posEventosLeitura)\n    {\n        if(TipVariavelLeitura[posEventosLeitura[key]] == 1 || TipVariavelLeitura[posEventosLeitura[key]] == 2)\n        {\n            if(leitura2.length > 1)\n            {\n                for(let pos in leitura2)\n                {\n                    leitura2[pos] = leitura2[pos].toFixed(NumCasasDecimais[posEventosLeitura[key]]);\n                }\n            } else\n            {\n                leitura2 = leitura2[0].toFixed(NumCasasDecimais[posEventosLeitura[key]]);\n            }\n\n            ValMuitoBaixo[posEventosLeitura[key]] = ValMuitoBaixo[posEventosLeitura[key]].toFixed(NumCasasDecimais[posEventosLeitura[key]]);\n            ValBaixo[posEventosLeitura[key]] = ValBaixo[posEventosLeitura[key]].toFixed(NumCasasDecimais[posEventosLeitura[key]]);\n            ValAlto[posEventosLeitura[key]] = ValAlto[posEventosLeitura[key]].toFixed(NumCasasDecimais[posEventosLeitura[key]]);\n            ValMuitoAlto[posEventosLeitura[key]] = ValMuitoAlto[posEventosLeitura[key]].toFixed(NumCasasDecimais[posEventosLeitura[key]]);\n\n            if (CodAreaProcesso[posEventosLeitura[key]] == CodAreaProcessoAPF[posEventosLeitura[key]]) {\n                TipFuncionando[posEventosLeitura[key]] = true\n            }\n            \n            json = {\n                \"CodVariavelLeitura\": CodVariavelLeitura[posEventosLeitura[key]],\n                \"ValMuitoBaixo\": ValMuitoBaixo[posEventosLeitura[key]],\n                \"ValBaixo\": ValBaixo[posEventosLeitura[key]],\n                \"ValVariavelLeitura\": leitura2,\n                \"ValVariavelLeituraString\": null,\n                \"ValAlto\": ValAlto[posEventosLeitura[key]],\n                \"ValMuitoAlto\": ValMuitoAlto[posEventosLeitura[key]],\n                \"TipFuncionando\": TipFuncionando[posEventosLeitura[key]],\n                \"DataVariavelLeitura\": DataVariavelLeituraDiaNova,\n                \"TipMonitoracaoPeriodico\": TipMonitoracaoPeriodico[posEventosLeitura[key]]\n            };\n        } else if(TipVariavelLeitura[posEventosLeitura[key]] == 3 || TipVariavelLeitura[posEventosLeitura[key]] == 4) \n        {\n            json = {\n                \"CodVariavelLeitura\": CodVariavelLeitura[posEventosLeitura[key]],\n                \"ValMuitoBaixo\": ValMuitoBaixo[posEventosLeitura[key]],\n                \"ValBaixo\": ValBaixo[posEventosLeitura[key]],\n                \"ValVariavelLeitura\": null,\n                \"ValVariavelLeituraString\": leitura2,\n                \"ValAlto\": ValAlto[posEventosLeitura[key]],\n                \"ValMuitoAlto\": ValMuitoAlto[posEventosLeitura[key]],\n                \"TipFuncionando\": TipFuncionando[posEventosLeitura[key]],\n                \"DataVariavelLeituraDia\": DataVariavelLeituraDiaNova,\n                \"TipMonitoracaoPeriodico\": TipMonitoracaoPeriodico[posEventosLeitura[key]]\n            };\n        }\n    }\n}\n\nmsg.payload = JSON.stringify(json) + \",\";\nif(msg.payload != \"\"){\n    escreveu2 = true\n    flow.set(\"escreveu2\", escreveu2)\n    node.warn(\"Eventos 2\");\n    node.warn(new Date().getTime());\n    return msg\n}",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
         "x": 190,
-        "y": 560,
-        "wires": [
-            [
-                "33a12895525953b2"
-            ]
-        ]
-    },
-    {
-        "id": "33a12895525953b2",
-        "type": "json",
-        "z": "f8a25b208ccc25c0",
-        "name": "",
-        "property": "payload",
-        "action": "",
-        "pretty": true,
-        "x": 350,
         "y": 520,
         "wires": [
             [
@@ -622,14 +606,14 @@
         "type": "file",
         "z": "f8a25b208ccc25c0",
         "name": "Escreve o arquivo",
-        "filename": "/home/nexxus/Documentos/ArquivosJSON/variavelLeituraValor.json",
+        "filename": "/home/nexxus/Documentos/ArquivosJSON/evento.json",
         "filenameType": "str",
         "appendNewline": true,
         "createDir": true,
         "overwriteFile": "false",
         "encoding": "none",
-        "x": 490,
-        "y": 560,
+        "x": 410,
+        "y": 520,
         "wires": [
             []
         ]
@@ -646,7 +630,7 @@
         "finalize": "",
         "libs": [],
         "x": 210,
-        "y": 600,
+        "y": 560,
         "wires": [
             [
                 "03783ff6ebeb25b8"
@@ -665,7 +649,7 @@
         "overwriteFile": "true",
         "encoding": "none",
         "x": 599.9999923706055,
-        "y": 599.9999675750732,
+        "y": 559.9999675750732,
         "wires": [
             [
                 "c58885622dc1f60f"
@@ -685,7 +669,7 @@
         "oldrc": false,
         "name": "exec bash editaVal.sh",
         "x": 779.9999885559082,
-        "y": 599.9999675750732,
+        "y": 559.9999675750732,
         "wires": [
             [],
             [],
@@ -704,7 +688,7 @@
         "stream": false,
         "addname": "",
         "x": 340.00000381469727,
-        "y": 599.9999685287476,
+        "y": 559.9999685287476,
         "wires": [
             [
                 "826dfd3bf8aa95ad"
@@ -729,7 +713,7 @@
         "allowrate": true,
         "outputs": 1,
         "x": 459.99999809265137,
-        "y": 599.9999675750732,
+        "y": 559.9999675750732,
         "wires": [
             [
                 "76e911d727e57e09"
@@ -748,7 +732,7 @@
         "finalize": "",
         "libs": [],
         "x": 115,
-        "y": 600,
+        "y": 560,
         "wires": [
             [
                 "53ce72a45d0843a1"
@@ -774,7 +758,7 @@
         "allowrate": false,
         "outputs": 1,
         "x": 75,
-        "y": 600,
+        "y": 560,
         "wires": [
             [
                 "924478c95f573a90"
@@ -792,7 +776,7 @@
             "9e26058fcf1a4f5a"
         ],
         "x": 55,
-        "y": 560,
+        "y": 520,
         "wires": [
             [
                 "9c328427bdd3687d",
@@ -822,7 +806,7 @@
         "payload": "",
         "payloadType": "date",
         "x": 130,
-        "y": 760,
+        "y": 720,
         "wires": [
             [
                 "4db7765393804c5d"
@@ -841,7 +825,7 @@
         "finalize": "",
         "libs": [],
         "x": 330,
-        "y": 760,
+        "y": 720,
         "wires": [
             [
                 "859512758cf1c728"
@@ -855,7 +839,7 @@
         "name": "Compara em sequencia as datas das variaveis",
         "info": "",
         "x": 220,
-        "y": 700,
+        "y": 660,
         "wires": []
     },
     {
@@ -875,7 +859,7 @@
         "name": "PERIODICAS",
         "info": "",
         "x": 110,
-        "y": 660,
+        "y": 620,
         "wires": []
     },
     {
@@ -890,7 +874,7 @@
         "stream": false,
         "addname": "",
         "x": 475,
-        "y": 760,
+        "y": 720,
         "wires": [
             [
                 "fcd644afef9d0c87"
@@ -903,14 +887,14 @@
         "type": "function",
         "z": "f8a25b208ccc25c0",
         "name": "forEach Modbus",
-        "func": "let posLeiturasPeriodicas = flow.get(\"posLeiturasPeriodicas\");\nvar devices = msg.payload;\nflow.set(\"aguarda\", true);\nflow.set(\"periodica\", true);\n\nmsg = [];\ndevices.forEach((/** @type {{ modbus_id: any; modbus_ip: any; modbus_port: any; address: any; quantity: any; }} */ dev) => {\n   let m_response = \"\";\n   let Modbus = global.get('jsmodbus');\n   let net = global.get('net');\n   let socket = new net.Socket();\n   let client = new Modbus.client.TCP(socket, dev.modbus_id);\n   let options =\n   {\n      host: dev.modbus_ip,\n      port: dev.modbus_port,\n      retryTime: 100,\n      retryAlways: false\n   };\n   let Reconnect = global.get('nodenetreconnect');\n   let recon = new Reconnect(socket, options);\n   socket.setTimeout(3000);\n   socket.on('connect', function () {\n      // if comparando o FC (dev.functioncode)\n      // if FC == 3\n      client\n         .readHoldingRegisters(dev.address, dev.quantity)\n         .then(function (resp) {\n            m_response = parseFloat(resp.response._body._values);\n            node.send({\n               \"topic\": \"Modbus Response\",\n               \"unitid\": dev.modbus_id,\n               \"host\": dev.modbus_ip,\n               \"port\": dev.modbus_port,\n               \"address\": dev.address,\n               \"quantity\": dev.quantity,\n               \"payload\": m_response\n            });\n            socket.end();\n            recon.end();\n         });\n      socket.end();\n      recon.end();\n   }, console.error);\n\n   socket.on('timeout', () => {\n      console.log('socket timeout');\n      flow.set(\"aguarda\", false);\n      recon.end();\n      socket.end();\n   });\n\n   socket.on('error', function (err) {\n      flow.set(\"aguarda\", false);\n      let conta = flow.get('conta');\n      flow.set(\"conta\", conta++);\n      if (err.code != \"ECONNRESET\") {\n         node.error({\n            \"ip\": dev.modbus_ip,\n            \"port\": dev.modbus_port,\n            \"message\": \"ERRO! Falha na leitura do host \" + dev.modbus_ip + \"!\",\n            \"error\": err.code\n         });\n         socket.end();\n         recon.end();\n      }\n      socket.end();\n      recon.end();\n   });\n   socket.connect(options);\n});\n\nreturn msg;",
+        "func": "let posLeiturasPeriodicas = flow.get(\"posLeiturasPeriodicas\");\nvar devices = msg.payload;\nflow.set(\"aguarda\", true);\nflow.set(\"periodica\", true);\n\nmsg = [];\ndevices.forEach((/** @type {{ modbus_id: any; modbus_ip: any; modbus_port: any; address: any; quantity: any; }} */ dev) => {\n   let m_response = \"\";\n   let Modbus = global.get('jsmodbus');\n   let net = global.get('net');\n   let socket = new net.Socket();\n   let client = new Modbus.client.TCP(socket, dev.modbus_id);\n   let options =\n   {\n      host: dev.modbus_ip,\n      port: dev.modbus_port,\n      retryTime: 100,\n      retryAlways: false\n   };\n   let Reconnect = global.get('nodenetreconnect');\n   let recon = new Reconnect(socket, options);\n   socket.setTimeout(3000);\n   socket.on('connect', function () {\n      // if comparando o FC (dev.functioncode)\n      // if FC == 3\n      client\n         .readHoldingRegisters(dev.address, dev.quantity)\n         .then(function (resp) {\n            m_response = parseFloat(resp.response._body._values);\n            node.send({\n               \"topic\": \"Modbus Response\",\n               \"unitid\": dev.modbus_id,\n               \"host\": dev.modbus_ip,\n               \"port\": dev.modbus_port,\n               \"address\": dev.address,\n               \"quantity\": dev.quantity,\n               \"payload\": m_response\n            });\n            socket.end();\n            recon.end();\n            net.Socket('close');\n         });\n      socket.end();\n      recon.end();\n      net.Socket('close');\n   }, console.error);\n\n   socket.on('timeout', () => {\n      console.log('socket timeout');\n      flow.set(\"aguarda\", false);\n      recon.end();\n      socket.end();\n      net.Socket('close');\n   });\n\n   socket.on('error', function (err) {\n      flow.set(\"aguarda\", false);\n      let conta = flow.get('conta');\n      flow.set(\"conta\", conta++);\n      if (err.code != \"ECONNRESET\") {\n         node.error({\n            \"ip\": dev.modbus_ip,\n            \"port\": dev.modbus_port,\n            \"message\": \"ERRO! Falha na leitura do host \" + dev.modbus_ip + \"!\",\n            \"error\": err.code\n         });\n         socket.end();\n         recon.end();\n         net.Socket('close');\n      }\n      socket.end();\n      recon.end();\n      net.Socket('close');\n   });\n   socket.connect(options);\n});\n\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
         "x": 620,
-        "y": 760,
+        "y": 720,
         "wires": [
             [
                 "3d63935d845fd309"
@@ -935,7 +919,7 @@
         "allowrate": false,
         "outputs": 1,
         "x": 515,
-        "y": 760,
+        "y": 720,
         "wires": [
             [
                 "d512432bcd1860db"
@@ -955,7 +939,7 @@
         "finalize": "",
         "libs": [],
         "x": 380,
-        "y": 920,
+        "y": 880,
         "wires": [
             [
                 "0afe28164be32b79"
@@ -980,7 +964,7 @@
         "outputType": "msg",
         "outTz": "America/Sao_Paulo",
         "x": 520,
-        "y": 880,
+        "y": 840,
         "wires": [
             [
                 "4970a67377471824"
@@ -994,7 +978,7 @@
         "name": "Escreve o arquivo de sai­da e modifica o arquivo dadosIniciais.json",
         "info": "",
         "x": 280,
-        "y": 820,
+        "y": 780,
         "wires": []
     },
     {
@@ -1003,7 +987,7 @@
         "z": "f8a25b208ccc25c0",
         "name": "dadosIniciaisVariaveis.json",
         "x": 200,
-        "y": 880,
+        "y": 840,
         "wires": [
             [
                 "8f21397d0d759a5c"
@@ -1021,7 +1005,7 @@
             "298b667fecb0214b"
         ],
         "x": 835,
-        "y": 760,
+        "y": 720,
         "wires": []
     },
     {
@@ -1034,7 +1018,7 @@
             "b301c2a9104dbe1a"
         ],
         "x": 55,
-        "y": 880,
+        "y": 840,
         "wires": [
             [
                 "6751b422fbf16935"
@@ -1046,30 +1030,14 @@
         "type": "function",
         "z": "f8a25b208ccc25c0",
         "name": "Modifica o payload saida",
-        "func": "let json = new Array();\n\nlet leitura = flow.get('leitura');\nlet TipConexao = global.get('TipConexaoVar');\nlet CodVariavelLeitura = global.get('CodVariavelLeituraVar');\nlet ValMuitoBaixo = global.get('ValMuitoBaixoVar');\nlet ValBaixo = global.get('ValBaixoVar');\nlet ValAlto = global.get('ValAltoVar');\nlet ValMuitoAlto = global.get('ValMuitoAltoVar');\nlet NumCasasDecimais = global.get('NumCasasDecimaisVar');\nlet ValEscala = global.get('ValEscalaVar');\nlet CodUnidadeEmpresa = global.get('CodUnidadeEmpresaVar');\nlet TipAlarmeDigital = global.get('TipAlarmeDigitalVar');\nlet TipVariavelLeitura = global.get('TipVariavelLeituraVar');\nlet TipMonitoracaoPeriodico = global.get('TipMonitoracaoPeriodicoVar');\n\nvar hora = flow.get('hora');\nvar data = msg.payload;\n\nconst DataAtualHoraNova = hora;\nconst DataVariavelLeituraHoraNova = hora;\nconst DataVariavelLeituraDiaNova = data;\n\nflow.set(\"DataVariavelLeituraHoraNova\", DataVariavelLeituraHoraNova);\nflow.set(\"DataVariavelLeituraDiaNova\", DataVariavelLeituraDiaNova);\nflow.set(\"DataAtualHoraNova\", DataAtualHoraNova);\n\nlet posLeiturasPeriodicas = flow.get('posLeiturasPeriodicas');\n\nlet TipFuncionando = global.get('TipFuncionandoVar');\nlet CodAreaProcessoAPF = global.get('CodAreaProcessoAPF');\nlet CodAreaProcesso = global.get('CodAreaProcessoVar');\n\nlet escreveu = false;\n\nif (posLeiturasPeriodicas != null && msg.payload != null)\n{   \n    if (TipVariavelLeitura[posLeiturasPeriodicas] == 1 || TipVariavelLeitura[posLeiturasPeriodicas] == 2)\n    {\n        leitura = leitura.toFixed(NumCasasDecimais[posLeiturasPeriodicas]);\n\n        ValMuitoBaixo[posLeiturasPeriodicas] = ValMuitoBaixo[posLeiturasPeriodicas].toFixed(NumCasasDecimais[posLeiturasPeriodicas]);\n        ValBaixo[posLeiturasPeriodicas] = ValBaixo[posLeiturasPeriodicas].toFixed(NumCasasDecimais[posLeiturasPeriodicas]);\n        ValAlto[posLeiturasPeriodicas] = ValAlto[posLeiturasPeriodicas].toFixed(NumCasasDecimais[posLeiturasPeriodicas]);\n        ValMuitoAlto[posLeiturasPeriodicas] = ValMuitoAlto[posLeiturasPeriodicas].toFixed(NumCasasDecimais[posLeiturasPeriodicas]);\n\n        if (CodAreaProcesso[posLeiturasPeriodicas] == CodAreaProcessoAPF[posLeiturasPeriodicas]) \n        {\n            TipFuncionando[posLeiturasPeriodicas] = true;\n        }\n\n        json.push({\n            \"CodVariavelLeitura\": CodVariavelLeitura[posLeiturasPeriodicas],\n            \"ValMuitoBaixo\": ValMuitoBaixo[posLeiturasPeriodicas],\n            \"ValBaixo\": ValBaixo[posLeiturasPeriodicas],\n            \"ValVariavelLeitura\": leitura,\n            \"ValVariavelLeituraString\": null,\n            \"ValAlto\": ValAlto[posLeiturasPeriodicas],\n            \"ValMuitoAlto\": ValMuitoAlto[posLeiturasPeriodicas],\n            \"TipFuncionando\": TipFuncionando[posLeiturasPeriodicas],\n            \"DataVariavelLeitura\": DataVariavelLeituraDiaNova,\n            \"TipMonitoracaoPeriodico\": TipMonitoracaoPeriodico[posLeiturasPeriodicas]\n        });\n\n    } else if (TipVariavelLeitura[posLeiturasPeriodicas] == 3 || TipVariavelLeitura[posLeiturasPeriodicas] == 4) {\n        json.push({\n            \"CodVariavelLeitura\": CodVariavelLeitura[posLeiturasPeriodicas],\n            \"ValMuitoBaixo\": ValMuitoBaixo[posLeiturasPeriodicas],\n            \"ValBaixo\": ValBaixo[posLeiturasPeriodicas],\n            \"ValVariavelLeitura\": null,\n            \"ValVariavelLeituraString\": leitura,\n            \"ValAlto\": ValAlto[posLeiturasPeriodicas],\n            \"ValMuitoAlto\": ValMuitoAlto[posLeiturasPeriodicas],\n            \"TipFuncionando\": TipFuncionando[posLeiturasPeriodicas],\n            \"DataVariavelLeituraDia\": DataVariavelLeituraDiaNova,\n            \"TipMonitoracaoPeriodico\": TipMonitoracaoPeriodico[posLeiturasPeriodicas]\n        });\n    }\n}\n\n\nmsg.payload = json;\nif(msg.payload != \"\")\n{\n    escreveu = true\n    flow.set(\"escreveu\", escreveu);\n    flow.set(\"contador\", 0)\n    flow.set(\"leitura\", [])\n    node.warn(\"Periodicas MODBUS 2\");\n    node.warn(new Date().getTime());\n    return msg;\n}",
+        "func": "let json = new Array();\n\nlet leitura = flow.get('leitura');\nlet TipConexao = global.get('TipConexaoVar');\nlet CodVariavelLeitura = global.get('CodVariavelLeituraVar');\nlet ValMuitoBaixo = global.get('ValMuitoBaixoVar');\nlet ValBaixo = global.get('ValBaixoVar');\nlet ValAlto = global.get('ValAltoVar');\nlet ValMuitoAlto = global.get('ValMuitoAltoVar');\nlet NumCasasDecimais = global.get('NumCasasDecimaisVar');\nlet ValEscala = global.get('ValEscalaVar');\nlet CodUnidadeEmpresa = global.get('CodUnidadeEmpresaVar');\nlet TipAlarmeDigital = global.get('TipAlarmeDigitalVar');\nlet TipVariavelLeitura = global.get('TipVariavelLeituraVar');\nlet TipMonitoracaoPeriodico = global.get('TipMonitoracaoPeriodicoVar');\n\nvar hora = flow.get('hora');\nvar data = msg.payload;\n\nconst DataAtualHoraNova = hora;\nconst DataVariavelLeituraHoraNova = hora;\nconst DataVariavelLeituraDiaNova = data;\n\nflow.set(\"DataVariavelLeituraHoraNova\", DataVariavelLeituraHoraNova);\nflow.set(\"DataVariavelLeituraDiaNova\", DataVariavelLeituraDiaNova);\nflow.set(\"DataAtualHoraNova\", DataAtualHoraNova);\n\nlet posLeiturasPeriodicas = flow.get('posLeiturasPeriodicas');\n\nlet TipFuncionando = global.get('TipFuncionandoVar');\nlet CodAreaProcessoAPF = global.get('CodAreaProcessoAPF');\nlet CodAreaProcesso = global.get('CodAreaProcessoVar');\n\nlet escreveu = false;\n\nif (posLeiturasPeriodicas != null && msg.payload != null)\n{   \n    if (TipVariavelLeitura[posLeiturasPeriodicas] == 1 || TipVariavelLeitura[posLeiturasPeriodicas] == 2)\n    {\n        leitura = leitura.toFixed(NumCasasDecimais[posLeiturasPeriodicas]);\n\n        ValMuitoBaixo[posLeiturasPeriodicas] = ValMuitoBaixo[posLeiturasPeriodicas].toFixed(NumCasasDecimais[posLeiturasPeriodicas]);\n        ValBaixo[posLeiturasPeriodicas] = ValBaixo[posLeiturasPeriodicas].toFixed(NumCasasDecimais[posLeiturasPeriodicas]);\n        ValAlto[posLeiturasPeriodicas] = ValAlto[posLeiturasPeriodicas].toFixed(NumCasasDecimais[posLeiturasPeriodicas]);\n        ValMuitoAlto[posLeiturasPeriodicas] = ValMuitoAlto[posLeiturasPeriodicas].toFixed(NumCasasDecimais[posLeiturasPeriodicas]);\n\n        if (CodAreaProcesso[posLeiturasPeriodicas] == CodAreaProcessoAPF[posLeiturasPeriodicas]) \n        {\n            TipFuncionando[posLeiturasPeriodicas] = true;\n        }\n\n        json = {\n            \"CodVariavelLeitura\": CodVariavelLeitura[posLeiturasPeriodicas],\n            \"ValMuitoBaixo\": ValMuitoBaixo[posLeiturasPeriodicas],\n            \"ValBaixo\": ValBaixo[posLeiturasPeriodicas],\n            \"ValVariavelLeitura\": leitura,\n            \"ValVariavelLeituraString\": null,\n            \"ValAlto\": ValAlto[posLeiturasPeriodicas],\n            \"ValMuitoAlto\": ValMuitoAlto[posLeiturasPeriodicas],\n            \"TipFuncionando\": TipFuncionando[posLeiturasPeriodicas],\n            \"DataVariavelLeitura\": DataVariavelLeituraDiaNova,\n            \"TipMonitoracaoPeriodico\": TipMonitoracaoPeriodico[posLeiturasPeriodicas]\n        };\n\n    } else if (TipVariavelLeitura[posLeiturasPeriodicas] == 3 || TipVariavelLeitura[posLeiturasPeriodicas] == 4) {\n        json = {\n            \"CodVariavelLeitura\": CodVariavelLeitura[posLeiturasPeriodicas],\n            \"ValMuitoBaixo\": ValMuitoBaixo[posLeiturasPeriodicas],\n            \"ValBaixo\": ValBaixo[posLeiturasPeriodicas],\n            \"ValVariavelLeitura\": null,\n            \"ValVariavelLeituraString\": leitura,\n            \"ValAlto\": ValAlto[posLeiturasPeriodicas],\n            \"ValMuitoAlto\": ValMuitoAlto[posLeiturasPeriodicas],\n            \"TipFuncionando\": TipFuncionando[posLeiturasPeriodicas],\n            \"DataVariavelLeituraDia\": DataVariavelLeituraDiaNova,\n            \"TipMonitoracaoPeriodico\": TipMonitoracaoPeriodico[posLeiturasPeriodicas]\n        };\n    }\n}\n\n\nmsg.payload = JSON.stringify(json)+\",\";\nif(msg.payload != \"\")\n{\n    escreveu = true\n    flow.set(\"escreveu\", escreveu);\n    flow.set(\"contador\", 0)\n    flow.set(\"leitura\", [])\n    node.warn(\"Periodicas MODBUS 2\");\n    node.warn(new Date().getTime());\n    return msg;\n}",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
         "x": 190,
-        "y": 1020,
-        "wires": [
-            [
-                "3d84af8f8b8edf57"
-            ]
-        ]
-    },
-    {
-        "id": "3d84af8f8b8edf57",
-        "type": "json",
-        "z": "f8a25b208ccc25c0",
-        "name": "",
-        "property": "payload",
-        "action": "",
-        "pretty": true,
-        "x": 350,
-        "y": 980,
+        "y": 940,
         "wires": [
             [
                 "0b4b9a5fb18ef457"
@@ -1081,14 +1049,14 @@
         "type": "file",
         "z": "f8a25b208ccc25c0",
         "name": "Escreve o arquivo",
-        "filename": "/home/nexxus/Documentos/ArquivosJSON/variavelLeituraPeriodicaValor.json",
+        "filename": "/home/nexxus/Documentos/ArquivosJSON/periodica.json",
         "filenameType": "str",
-        "appendNewline": true,
+        "appendNewline": false,
         "createDir": true,
         "overwriteFile": "false",
         "encoding": "none",
-        "x": 490,
-        "y": 1020,
+        "x": 410,
+        "y": 940,
         "wires": [
             []
         ]
@@ -1105,7 +1073,7 @@
         "finalize": "",
         "libs": [],
         "x": 125,
-        "y": 1060,
+        "y": 980,
         "wires": [
             [
                 "af8b6b28390bd357"
@@ -1131,7 +1099,7 @@
         "allowrate": false,
         "outputs": 1,
         "x": 85,
-        "y": 1060,
+        "y": 980,
         "wires": [
             [
                 "3dae412d934ea23b"
@@ -1152,7 +1120,7 @@
         "oldrc": false,
         "name": "exec bash escreve.sh",
         "x": 831,
-        "y": 1060,
+        "y": 980,
         "wires": [
             [],
             [],
@@ -1171,7 +1139,7 @@
         "finalize": "",
         "libs": [],
         "x": 220,
-        "y": 1060,
+        "y": 980,
         "wires": [
             [
                 "b47e6b5eee902a7b"
@@ -1190,7 +1158,7 @@
         "stream": false,
         "addname": "",
         "x": 350,
-        "y": 1060,
+        "y": 980,
         "wires": [
             [
                 "a258640097b4cddf"
@@ -1215,7 +1183,7 @@
         "allowrate": true,
         "outputs": 1,
         "x": 470,
-        "y": 1060,
+        "y": 980,
         "wires": [
             [
                 "af873b0c4b2dec72"
@@ -1234,7 +1202,7 @@
         "overwriteFile": "true",
         "encoding": "none",
         "x": 610,
-        "y": 1060,
+        "y": 980,
         "wires": [
             [
                 "c642d20e9d7846da"
@@ -1253,7 +1221,7 @@
         "finalize": "",
         "libs": [],
         "x": 705,
-        "y": 1060,
+        "y": 980,
         "wires": [
             [
                 "c769bc90d1c0dfe1"
@@ -1271,7 +1239,7 @@
             "35df115a194d23a2"
         ],
         "x": 55,
-        "y": 1020,
+        "y": 940,
         "wires": [
             [
                 "db00bf45f99b0c85",
@@ -1290,7 +1258,7 @@
             "3e216ee42b49f791"
         ],
         "x": 605,
-        "y": 880,
+        "y": 840,
         "wires": []
     },
     {
@@ -1305,7 +1273,7 @@
         "finalize": "",
         "libs": [],
         "x": 760,
-        "y": 760,
+        "y": 720,
         "wires": [
             [
                 "de5c1df44f160b1b"
@@ -1484,7 +1452,7 @@
         "type": "function",
         "z": "790c4063f20b5b89",
         "name": "forEach NodeS7",
-        "func": "let periodica = flow.get('periodica')\n\nvar devices = msg.payload;\nflow.set(\"aguarda2\", true);\n\nmsg = [];\nif(periodica != true)\n{\n    devices.forEach((/** @type {{ modbus_id: any; modbus_ip: any; modbus_port: any; address: any; quantity: any; }} */ dev) => {\n        let nodes7 = global.get('nodes7');\n        var conn = new nodes7;\n        var doneReading = false;\n        \n        var variables = {\n            DATA: dev.data\n        };\n\n        conn.initiateConnection({ port: dev.port, host: dev.ip, rack: dev.rack, slot: dev.slot, debug: false }, connected);\n        function connected(err) {\n            if (typeof (err) !== \"undefined\") {\n                // PLC FORA DO ALCANCE\n                //console.log(err);\n                node.error({\n                    \"ip\": dev.ip,\n                    \"port\": dev.port,\n                    \"message\": \"ERRO! Falha na leitura do host \" + dev.ip + \"!\",\n                    \"error\": err.code\n                });\n                conn.dropConnection();\n            }\n            conn.setTranslationCB(function (tag) { return variables[tag]; });\n            conn.addItems('DATA');\n            conn.readAllItems(valuesReady);\n        }\n\n        function valuesReady(anythingBad, values) {\n            if (anythingBad) { console.log(\"ERRO! Falha na leitura do host.\"); conn.dropConnection(); }\n            //console.log(values);\n            if(values.DATA != \"BAD 255\")\n            {\n                node.send({\n                    \"topic\": \"TCP Response\",\n                    \"host\": dev.ip,\n                    \"port\": dev.port,\n                    \"rack\": dev.rack,\n                    \"slot\": dev.slot,\n                    \"data\": dev.data,\n                    \"payload\": values.DATA\n                });\n            }\n            doneReading = true;\n            if (doneReading) { conn.dropConnection(); }\n        }\n    });\n}\nreturn msg;",
+        "func": "let periodica = flow.get('periodica')\n\nvar devices = msg.payload;\nflow.set(\"aguarda2\", true);\n\nmsg = [];\nif(periodica == false)\n{\n    devices.forEach((/** @type {{ modbus_id: any; modbus_ip: any; modbus_port: any; address: any; quantity: any; }} */ dev) => {\n        let nodes7 = global.get('nodes7');\n        var conn = new nodes7({ debug: true });\n        var doneReading = false;\n        \n        var variables = {\n            DATA: dev.data\n        };\n\n        conn.initiateConnection({ port: dev.port, host: dev.ip, rack: dev.rack, slot: dev.slot, debug: false }, connected);\n        function connected(err) {\n            if (typeof (err) !== \"undefined\") {\n                // PLC FORA DO ALCANCE\n                //console.log(err);\n                node.error({\n                    \"ip\": dev.ip,\n                    \"port\": dev.port,\n                    \"message\": \"ERRO! Falha na leitura do host \" + dev.ip + \"!\",\n                    \"error\": err.code\n                });\n                conn.connectionCleanup();\n                conn.dropConnection();\n            }\n            conn.setTranslationCB(function (tag) { return variables[tag]; });\n            conn.addItems('DATA');\n            conn.readAllItems(valuesReady);\n        }\n\n        function valuesReady(anythingBad, values) {\n            if (anythingBad) {\n                console.log(\"ERRO! Falha na leitura do host.\"); conn.connectionCleanup(); conn.dropConnection(); }\n            //console.log(values);\n            if(values.DATA != \"BAD 255\")\n            {\n                node.send({\n                    \"topic\": \"TCP Response\",\n                    \"host\": dev.ip,\n                    \"port\": dev.port,\n                    \"rack\": dev.rack,\n                    \"slot\": dev.slot,\n                    \"data\": dev.data,\n                    \"payload\": values.DATA\n                });\n            }\n            doneReading = true;\n            if (doneReading) { conn.connectionCleanup(); conn.dropConnection(); }\n        }\n    });\n}\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -1673,29 +1641,13 @@
         "type": "function",
         "z": "790c4063f20b5b89",
         "name": "Modifica o payload saida",
-        "func": "let json = new Array();\n\nlet leitura2 = flow.get('leitura2');\nlet TipConexao = global.get('TipConexaoVar');\nlet CodVariavelLeitura = global.get('CodVariavelLeituraVar');\nlet ValMuitoBaixo = global.get('ValMuitoBaixoVar');\nlet ValBaixo = global.get('ValBaixoVar');\nlet ValAlto = global.get('ValAltoVar');\nlet ValMuitoAlto = global.get('ValMuitoAltoVar');\nlet NumCasasDecimais = global.get('NumCasasDecimaisVar');\nlet ValEscala = global.get('ValEscalaVar');\nlet CodUnidadeEmpresa = global.get('CodUnidadeEmpresaVar');\nlet TipAlarmeDigital = global.get('TipAlarmeDigitalVar');\nlet TipVariavelLeitura = global.get('TipVariavelLeituraVar');\nlet TipMonitoracaoPeriodico = global.get('TipMonitoracaoPeriodicoVar');\nlet posEventosLeitura = flow.get('posEventosLeitura');\n\nvar hora = flow.get('hora2');\nvar data = msg.payload;\n\nconst DataAtualHoraNova = hora;\nconst DataVariavelLeituraHoraNova = hora;\nconst DataVariavelLeituraDiaNova = data;\n\nflow.set(\"DataVariavelLeituraHoraNova2\", DataVariavelLeituraHoraNova);\nflow.set(\"DataVariavelLeituraDiaNova2\", DataVariavelLeituraDiaNova);\nflow.set(\"DataAtualHoraNova2\", DataAtualHoraNova);\n\nlet TipFuncionando = global.get('TipFuncionandoVar');\nlet CodAreaProcessoAPF = global.get('CodAreaProcessoAPF');\nlet CodAreaProcesso = global.get('CodAreaProcessoVar');\n\nlet escreveu2 = false;\n\nif(posEventosLeitura != null && msg.payload != null)\n{\n    for(let key in posEventosLeitura)\n    {\n        if(TipVariavelLeitura[posEventosLeitura[key]] == 1 || TipVariavelLeitura[posEventosLeitura[key]] == 2)\n        {\n            if(leitura2.length > 1)\n            {\n                for(let pos in leitura2)\n                {\n                    leitura2[pos] = leitura2[pos].toFixed(NumCasasDecimais[posEventosLeitura[key]]);\n                }\n            } else\n            {\n                leitura2 = leitura2[0].toFixed(NumCasasDecimais[posEventosLeitura[key]]);\n            }\n\n            ValMuitoBaixo[posEventosLeitura[key]] = ValMuitoBaixo[posEventosLeitura[key]].toFixed(NumCasasDecimais[posEventosLeitura[key]]);\n            ValBaixo[posEventosLeitura[key]] = ValBaixo[posEventosLeitura[key]].toFixed(NumCasasDecimais[posEventosLeitura[key]]);\n            ValAlto[posEventosLeitura[key]] = ValAlto[posEventosLeitura[key]].toFixed(NumCasasDecimais[posEventosLeitura[key]]);\n            ValMuitoAlto[posEventosLeitura[key]] = ValMuitoAlto[posEventosLeitura[key]].toFixed(NumCasasDecimais[posEventosLeitura[key]]);\n\n            if (CodAreaProcesso[posEventosLeitura[key]] == CodAreaProcessoAPF[posEventosLeitura[key]]) {\n                TipFuncionando[posEventosLeitura[key]] = true\n            }\n            \n            json.push({\n                \"CodVariavelLeitura\": CodVariavelLeitura[posEventosLeitura[key]],\n                \"ValMuitoBaixo\": ValMuitoBaixo[posEventosLeitura[key]],\n                \"ValBaixo\": ValBaixo[posEventosLeitura[key]],\n                \"ValVariavelLeitura\": leitura2,\n                \"ValVariavelLeituraString\": null,\n                \"ValAlto\": ValAlto[posEventosLeitura[key]],\n                \"ValMuitoAlto\": ValMuitoAlto[posEventosLeitura[key]],\n                \"TipFuncionando\": TipFuncionando[posEventosLeitura[key]],\n                \"DataVariavelLeitura\": DataVariavelLeituraDiaNova,\n                \"TipMonitoracaoPeriodico\": TipMonitoracaoPeriodico[posEventosLeitura[key]]\n            });\n        } else if(TipVariavelLeitura[posEventosLeitura[key]] == 3 || TipVariavelLeitura[posEventosLeitura[key]] == 4) \n        {\n            if(leitura2.length == 1)\n            {\n                json.push({\n                    \"CodVariavelLeitura\": CodVariavelLeitura[posEventosLeitura[key]],\n                    \"ValMuitoBaixo\": ValMuitoBaixo[posEventosLeitura[key]],\n                    \"ValBaixo\": ValBaixo[posEventosLeitura[key]],\n                    \"ValVariavelLeitura\": null,\n                    \"ValVariavelLeituraString\": leitura2[0],\n                    \"ValAlto\": ValAlto[posEventosLeitura[key]],\n                    \"ValMuitoAlto\": ValMuitoAlto[posEventosLeitura[key]],\n                    \"TipFuncionando\": TipFuncionando[posEventosLeitura[key]],\n                    \"DataVariavelLeituraDia\": DataVariavelLeituraDiaNova,\n                    \"TipMonitoracaoPeriodico\": TipMonitoracaoPeriodico[posEventosLeitura[key]]\n                });\n            } \n            else if(leitura2.length > 1)\n            {\n                json.push({\n                    \"CodVariavelLeitura\": CodVariavelLeitura[posEventosLeitura[key]],\n                    \"ValMuitoBaixo\": ValMuitoBaixo[posEventosLeitura[key]],\n                    \"ValBaixo\": ValBaixo[posEventosLeitura[key]],\n                    \"ValVariavelLeitura\": null,\n                    \"ValVariavelLeituraString\": leitura2,\n                    \"ValAlto\": ValAlto[posEventosLeitura[key]],\n                    \"ValMuitoAlto\": ValMuitoAlto[posEventosLeitura[key]],\n                    \"TipFuncionando\": TipFuncionando[posEventosLeitura[key]],\n                    \"DataVariavelLeituraDia\": DataVariavelLeituraDiaNova,\n                    \"TipMonitoracaoPeriodico\": TipMonitoracaoPeriodico[posEventosLeitura[key]]\n                });\n            }\n        }\n    }\n}\n\nmsg.payload = json\nif(msg.payload != \"\"){\n    escreveu2 = true\n    flow.set(\"escreveu2\", escreveu2)\n    //node.warn(\"Eventos 2\");\n    //node.warn(new Date().getTime());\n    return msg\n}",
+        "func": "let json = new Array();\n\nlet leitura2 = flow.get('leitura2');\nlet TipConexao = global.get('TipConexaoVar');\nlet CodVariavelLeitura = global.get('CodVariavelLeituraVar');\nlet ValMuitoBaixo = global.get('ValMuitoBaixoVar');\nlet ValBaixo = global.get('ValBaixoVar');\nlet ValAlto = global.get('ValAltoVar');\nlet ValMuitoAlto = global.get('ValMuitoAltoVar');\nlet NumCasasDecimais = global.get('NumCasasDecimaisVar');\nlet ValEscala = global.get('ValEscalaVar');\nlet CodUnidadeEmpresa = global.get('CodUnidadeEmpresaVar');\nlet TipAlarmeDigital = global.get('TipAlarmeDigitalVar');\nlet TipVariavelLeitura = global.get('TipVariavelLeituraVar');\nlet TipMonitoracaoPeriodico = global.get('TipMonitoracaoPeriodicoVar');\nlet posEventosLeitura = flow.get('posEventosLeitura');\n\nvar hora = flow.get('hora2');\nvar data = msg.payload;\n\nconst DataAtualHoraNova = hora;\nconst DataVariavelLeituraHoraNova = hora;\nconst DataVariavelLeituraDiaNova = data;\n\nflow.set(\"DataVariavelLeituraHoraNova2\", DataVariavelLeituraHoraNova);\nflow.set(\"DataVariavelLeituraDiaNova2\", DataVariavelLeituraDiaNova);\nflow.set(\"DataAtualHoraNova2\", DataAtualHoraNova);\n\nlet TipFuncionando = global.get('TipFuncionandoVar');\nlet CodAreaProcessoAPF = global.get('CodAreaProcessoAPF');\nlet CodAreaProcesso = global.get('CodAreaProcessoVar');\n\nlet escreveu2 = false;\n\nif(posEventosLeitura != null && msg.payload != null)\n{\n    for(let key in posEventosLeitura)\n    {\n        if(TipVariavelLeitura[posEventosLeitura[key]] == 1 || TipVariavelLeitura[posEventosLeitura[key]] == 2)\n        {\n            if(leitura2.length > 1)\n            {\n                for(let pos in leitura2)\n                {\n                    leitura2[pos] = leitura2[pos].toFixed(NumCasasDecimais[posEventosLeitura[key]]);\n                }\n            } else\n            {\n                leitura2 = leitura2[0].toFixed(NumCasasDecimais[posEventosLeitura[key]]);\n            }\n\n            ValMuitoBaixo[posEventosLeitura[key]] = ValMuitoBaixo[posEventosLeitura[key]].toFixed(NumCasasDecimais[posEventosLeitura[key]]);\n            ValBaixo[posEventosLeitura[key]] = ValBaixo[posEventosLeitura[key]].toFixed(NumCasasDecimais[posEventosLeitura[key]]);\n            ValAlto[posEventosLeitura[key]] = ValAlto[posEventosLeitura[key]].toFixed(NumCasasDecimais[posEventosLeitura[key]]);\n            ValMuitoAlto[posEventosLeitura[key]] = ValMuitoAlto[posEventosLeitura[key]].toFixed(NumCasasDecimais[posEventosLeitura[key]]);\n\n            if (CodAreaProcesso[posEventosLeitura[key]] == CodAreaProcessoAPF[posEventosLeitura[key]]) {\n                TipFuncionando[posEventosLeitura[key]] = true\n            }\n            \n            json = {\n                \"CodVariavelLeitura\": CodVariavelLeitura[posEventosLeitura[key]],\n                \"ValMuitoBaixo\": ValMuitoBaixo[posEventosLeitura[key]],\n                \"ValBaixo\": ValBaixo[posEventosLeitura[key]],\n                \"ValVariavelLeitura\": leitura2,\n                \"ValVariavelLeituraString\": null,\n                \"ValAlto\": ValAlto[posEventosLeitura[key]],\n                \"ValMuitoAlto\": ValMuitoAlto[posEventosLeitura[key]],\n                \"TipFuncionando\": TipFuncionando[posEventosLeitura[key]],\n                \"DataVariavelLeitura\": DataVariavelLeituraDiaNova,\n                \"TipMonitoracaoPeriodico\": TipMonitoracaoPeriodico[posEventosLeitura[key]]\n            };\n        } else if(TipVariavelLeitura[posEventosLeitura[key]] == 3 || TipVariavelLeitura[posEventosLeitura[key]] == 4) \n        {\n            if(leitura2.length == 1)\n            {\n                json = {\n                    \"CodVariavelLeitura\": CodVariavelLeitura[posEventosLeitura[key]],\n                    \"ValMuitoBaixo\": ValMuitoBaixo[posEventosLeitura[key]],\n                    \"ValBaixo\": ValBaixo[posEventosLeitura[key]],\n                    \"ValVariavelLeitura\": null,\n                    \"ValVariavelLeituraString\": leitura2[0],\n                    \"ValAlto\": ValAlto[posEventosLeitura[key]],\n                    \"ValMuitoAlto\": ValMuitoAlto[posEventosLeitura[key]],\n                    \"TipFuncionando\": TipFuncionando[posEventosLeitura[key]],\n                    \"DataVariavelLeituraDia\": DataVariavelLeituraDiaNova,\n                    \"TipMonitoracaoPeriodico\": TipMonitoracaoPeriodico[posEventosLeitura[key]]\n                };\n            } \n            else if(leitura2.length > 1)\n            {\n                json = {\n                    \"CodVariavelLeitura\": CodVariavelLeitura[posEventosLeitura[key]],\n                    \"ValMuitoBaixo\": ValMuitoBaixo[posEventosLeitura[key]],\n                    \"ValBaixo\": ValBaixo[posEventosLeitura[key]],\n                    \"ValVariavelLeitura\": null,\n                    \"ValVariavelLeituraString\": leitura2,\n                    \"ValAlto\": ValAlto[posEventosLeitura[key]],\n                    \"ValMuitoAlto\": ValMuitoAlto[posEventosLeitura[key]],\n                    \"TipFuncionando\": TipFuncionando[posEventosLeitura[key]],\n                    \"DataVariavelLeituraDia\": DataVariavelLeituraDiaNova,\n                    \"TipMonitoracaoPeriodico\": TipMonitoracaoPeriodico[posEventosLeitura[key]]\n                };\n            }\n        }\n    }\n}\n\nmsg.payload = JSON.stringify(json) + \",\";\nif(msg.payload != \"\"){\n    escreveu2 = true\n    flow.set(\"escreveu2\", escreveu2)\n    //node.warn(\"Eventos 2\");\n    //node.warn(new Date().getTime());\n    return msg\n}",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
         "x": 190,
-        "y": 560,
-        "wires": [
-            [
-                "06249fc6381dc08d"
-            ]
-        ]
-    },
-    {
-        "id": "06249fc6381dc08d",
-        "type": "json",
-        "z": "790c4063f20b5b89",
-        "name": "",
-        "property": "payload",
-        "action": "",
-        "pretty": true,
-        "x": 350,
         "y": 520,
         "wires": [
             [
@@ -1708,14 +1660,14 @@
         "type": "file",
         "z": "790c4063f20b5b89",
         "name": "Escreve o arquivo",
-        "filename": "/home/nexxus/Documentos/ArquivosJSON/variavelLeituraValor.json",
+        "filename": "/home/nexxus/Documentos/ArquivosJSON/evento.json",
         "filenameType": "str",
         "appendNewline": true,
         "createDir": true,
         "overwriteFile": "false",
         "encoding": "none",
-        "x": 490,
-        "y": 560,
+        "x": 410,
+        "y": 520,
         "wires": [
             []
         ]
@@ -1732,7 +1684,7 @@
         "finalize": "",
         "libs": [],
         "x": 210,
-        "y": 600,
+        "y": 560,
         "wires": [
             [
                 "ebef3944f4f29aab"
@@ -1751,7 +1703,7 @@
         "overwriteFile": "true",
         "encoding": "none",
         "x": 599.9999923706055,
-        "y": 599.9999675750732,
+        "y": 559.9999675750732,
         "wires": [
             [
                 "bc976f47e4425a7b"
@@ -1771,7 +1723,7 @@
         "oldrc": false,
         "name": "exec bash editaVal.sh",
         "x": 779.9999885559082,
-        "y": 599.9999675750732,
+        "y": 559.9999675750732,
         "wires": [
             [],
             [],
@@ -1790,7 +1742,7 @@
         "stream": false,
         "addname": "",
         "x": 340,
-        "y": 600,
+        "y": 560,
         "wires": [
             [
                 "e4e5e646443ed402"
@@ -1815,7 +1767,7 @@
         "allowrate": true,
         "outputs": 1,
         "x": 459.99999809265137,
-        "y": 599.9999675750732,
+        "y": 559.9999675750732,
         "wires": [
             [
                 "859837984cb9bbe4"
@@ -1834,7 +1786,7 @@
         "finalize": "",
         "libs": [],
         "x": 115,
-        "y": 600,
+        "y": 560,
         "wires": [
             [
                 "ce8bd1c1a381f02b"
@@ -1860,7 +1812,7 @@
         "allowrate": false,
         "outputs": 1,
         "x": 75,
-        "y": 600,
+        "y": 560,
         "wires": [
             [
                 "8a93c5c2b8d896aa"
@@ -1877,7 +1829,7 @@
             "7cd93dd6b3df5144"
         ],
         "x": 55,
-        "y": 560,
+        "y": 520,
         "wires": [
             [
                 "4a918bb19a1a78cc",
@@ -1892,7 +1844,7 @@
         "name": "Compara em sequencia as datas das variaveis",
         "info": "",
         "x": 220,
-        "y": 700,
+        "y": 660,
         "wires": []
     },
     {
@@ -1902,7 +1854,7 @@
         "name": "PERIODICAS",
         "info": "",
         "x": 110,
-        "y": 660,
+        "y": 620,
         "wires": []
     },
     {
@@ -1927,7 +1879,7 @@
         "payload": "",
         "payloadType": "date",
         "x": 130,
-        "y": 760,
+        "y": 720,
         "wires": [
             [
                 "a7064ac41a8adc07"
@@ -1946,7 +1898,7 @@
         "finalize": "",
         "libs": [],
         "x": 330,
-        "y": 760,
+        "y": 720,
         "wires": [
             [
                 "9beaa9585d694534"
@@ -1965,7 +1917,7 @@
         "stream": false,
         "addname": "",
         "x": 475,
-        "y": 760,
+        "y": 720,
         "wires": [
             [
                 "8d8fa71aadf98cd2"
@@ -1978,14 +1930,19 @@
         "type": "function",
         "z": "790c4063f20b5b89",
         "name": "forEach NodeS7",
-        "func": "let posLeiturasPeriodicas = flow.get(\"posLeiturasPeriodicas\");\nvar devices = msg.payload;\nflow.set(\"aguarda\", true);\nflow.set(\"periodica\", true);\n\nmsg = [];\n\nlet nodes7 = global.get('nodes7');\nvar conn = new nodes7;\nvar doneReading = false;\n\ndevices.forEach((/** @type {{ modbus_id: any; modbus_ip: any; modbus_port: any; address: any; quantity: any; }} */ dev) => {\n   var variables = {\n      DATA: dev.data\n   };\n   \n   conn.initiateConnection({ port: dev.port, host: dev.ip, rack: dev.rack, slot: dev.slot, debug: false }, connected);\n   function connected(err) {\n      if (typeof (err) !== \"undefined\") {\n         // PLC FORA DO ALCANCE\n         //console.log(err);\n         node.error({\n            \"ip\": dev.ip,\n            \"port\": dev.port,\n            \"message\": \"ERRO! Falha na leitura do host \" + dev.ip + \"!\",\n            \"error\": err.code\n         });\n         flow.set(\"aguarda\", false);\n         conn.dropConnection();\n         conn.connectionCleanup();\n      }\n      conn.setTranslationCB(function (tag) { return variables[tag]; });\n      conn.addItems('DATA');\n      conn.readAllItems(valuesReady);\n   }\n\n   function valuesReady(anythingBad, values) {\n      if (anythingBad) { console.log(\"ERRO! Falha na leitura do host.\"); flow.set(\"aguarda\", false); conn.dropConnection(); conn.connectionCleanup(); }\n      //console.log(values);\n      if (values.DATA != \"BAD 255\") {\n         node.send({\n            \"topic\": \"TCP Response\",\n            \"host\": dev.ip,\n            \"port\": dev.port,\n            \"rack\": dev.rack,\n            \"slot\": dev.slot,\n            \"data\": dev.data,\n            \"payload\": values.DATA\n         });\n      }\n      doneReading = true;\n      conn.dropConnection();\n      conn.connectionCleanup();\n   }\n});\n\nreturn msg;",
+        "func": "let posLeiturasPeriodicas = flow.get(\"posLeiturasPeriodicas\");\nvar devices = msg.payload;\nflow.set(\"aguarda\", true);\nflow.set(\"periodica\", true);\n\nmsg = [];\n\nlet nodes7 = global.get('nodes7');\nvar conn = new nodes7({ debug: true });\n\ndevices.forEach((/** @type {{ modbus_id: any; modbus_ip: any; modbus_port: any; address: any; quantity: any; }} */ dev) => {\n   var variables = {\n      DATA: dev.data\n   };\n   \n   conn.initiateConnection({ port: dev.port, host: dev.ip, rack: dev.rack, slot: dev.slot, debug: true }, connected);\n   function connected(err) {\n      if (typeof (err) !== \"undefined\") {\n         // PLC FORA DO ALCANCE\n         console.log(err);\n         node.error({\n            \"ip\": dev.ip,\n            \"port\": dev.port,\n            \"message\": \"ERRO! Falha na leitura do host \" + dev.ip + \"!\",\n            \"error\": err.code\n         });\n         flow.set(\"aguarda\", false);\n         conn.connectionCleanup();\n         conn.dropConnection();\n      }\n      conn.setTranslationCB(function (tag) { return variables[tag]; });\n      conn.addItems('DATA');\n      conn.readAllItems(valuesReady);\n   }\n\n   function valuesReady(anythingBad, values) {\n      if (anythingBad) {\n         console.log(\"ERRO! Falha na leitura do host.\"); flow.set(\"aguarda\", false); conn.connectionCleanup(); conn.dropConnection();}\n      //console.log(values);\n      if (values.DATA != \"BAD 255\") {\n         node.send({\n            \"topic\": \"TCP Response\",\n            \"host\": dev.ip,\n            \"port\": dev.port,\n            \"rack\": dev.rack,\n            \"slot\": dev.slot,\n            \"data\": dev.data,\n            \"payload\": values.DATA\n         });\n      }\n      flow.set(\"aguarda\", false);\n      conn.connectionCleanup();\n      conn.dropConnection();\n   }\n});\n\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
-        "libs": [],
-        "x": 620,
-        "y": 760,
+        "libs": [
+            {
+                "var": "process",
+                "module": "process"
+            }
+        ],
+        "x": 640,
+        "y": 720,
         "wires": [
             [
                 "223e09d85e1255b7"
@@ -2001,7 +1958,7 @@
         "timeout": "1",
         "timeoutUnits": "seconds",
         "rate": "1",
-        "nbRateUnits": "0.3",
+        "nbRateUnits": "3",
         "rateUnits": "second",
         "randomFirst": "1",
         "randomLast": "5",
@@ -2010,10 +1967,11 @@
         "allowrate": false,
         "outputs": 1,
         "x": 515,
-        "y": 760,
+        "y": 720,
         "wires": [
             [
-                "202005e57a1d3100"
+                "202005e57a1d3100",
+                "0c5f0586eafd8f4e"
             ]
         ],
         "l": false
@@ -2029,8 +1987,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 761,
-        "y": 760,
+        "x": 781,
+        "y": 720,
         "wires": [
             [
                 "0af0d1055ad20fe9"
@@ -2049,7 +2007,7 @@
         "finalize": "",
         "libs": [],
         "x": 380,
-        "y": 920,
+        "y": 880,
         "wires": [
             [
                 "9f48cca35daa9a3d"
@@ -2074,7 +2032,7 @@
         "outputType": "msg",
         "outTz": "America/Sao_Paulo",
         "x": 520,
-        "y": 880,
+        "y": 840,
         "wires": [
             [
                 "38a4d5eb3f7e1646"
@@ -2088,7 +2046,7 @@
         "name": "Escreve o arquivo de sai­da e modifica o arquivo dadosIniciais.json",
         "info": "",
         "x": 280,
-        "y": 820,
+        "y": 780,
         "wires": []
     },
     {
@@ -2097,7 +2055,7 @@
         "z": "790c4063f20b5b89",
         "name": "dadosIniciaisVariaveis.json",
         "x": 200,
-        "y": 880,
+        "y": 840,
         "wires": [
             [
                 "f6d2749d20afbe47"
@@ -2113,8 +2071,8 @@
         "links": [
             "9336ec81fbfdc4d7"
         ],
-        "x": 835,
-        "y": 760,
+        "x": 855,
+        "y": 720,
         "wires": []
     },
     {
@@ -2126,7 +2084,7 @@
             "0af0d1055ad20fe9"
         ],
         "x": 55,
-        "y": 880,
+        "y": 840,
         "wires": [
             [
                 "99e480ee6fdb3440"
@@ -2143,7 +2101,7 @@
             "dffb0de506d9be62"
         ],
         "x": 605,
-        "y": 880,
+        "y": 840,
         "wires": []
     },
     {
@@ -2151,29 +2109,13 @@
         "type": "function",
         "z": "790c4063f20b5b89",
         "name": "Modifica o payload saida",
-        "func": "let json = new Array();\n\nlet leitura = flow.get('leitura');\nlet TipConexao = global.get('TipConexaoVar');\nlet CodVariavelLeitura = global.get('CodVariavelLeituraVar');\nlet ValMuitoBaixo = global.get('ValMuitoBaixoVar');\nlet ValBaixo = global.get('ValBaixoVar');\nlet ValAlto = global.get('ValAltoVar');\nlet ValMuitoAlto = global.get('ValMuitoAltoVar');\nlet NumCasasDecimais = global.get('NumCasasDecimaisVar');\nlet ValEscala = global.get('ValEscalaVar');\nlet CodUnidadeEmpresa = global.get('CodUnidadeEmpresaVar');\nlet TipAlarmeDigital = global.get('TipAlarmeDigitalVar');\nlet TipVariavelLeitura = global.get('TipVariavelLeituraVar');\nlet TipMonitoracaoPeriodico = global.get('TipMonitoracaoPeriodicoVar');\n\nvar hora = flow.get('hora');\nvar data = msg.payload;\n\nconst DataAtualHoraNova = hora;\nconst DataVariavelLeituraHoraNova = hora;\nconst DataVariavelLeituraDiaNova = data;\n\nflow.set(\"DataVariavelLeituraHoraNova\", DataVariavelLeituraHoraNova);\nflow.set(\"DataVariavelLeituraDiaNova\", DataVariavelLeituraDiaNova);\nflow.set(\"DataAtualHoraNova\", DataAtualHoraNova);\n\nlet posLeiturasPeriodicas = flow.get('posLeiturasPeriodicas');\n\nlet TipFuncionando = global.get('TipFuncionandoVar');\nlet CodAreaProcessoAPF = global.get('CodAreaProcessoAPF');\nlet CodAreaProcesso = global.get('CodAreaProcessoVar');\n\nlet escreveu = false;\n\nif (posLeiturasPeriodicas != null && msg.payload != null)\n{   \n    if (TipVariavelLeitura[posLeiturasPeriodicas] == 1 || TipVariavelLeitura[posLeiturasPeriodicas] == 2)\n    {\n        leitura = leitura.toFixed(NumCasasDecimais[posLeiturasPeriodicas]);\n\n        ValMuitoBaixo[posLeiturasPeriodicas] = ValMuitoBaixo[posLeiturasPeriodicas].toFixed(NumCasasDecimais[posLeiturasPeriodicas]);\n        ValBaixo[posLeiturasPeriodicas] = ValBaixo[posLeiturasPeriodicas].toFixed(NumCasasDecimais[posLeiturasPeriodicas]);\n        ValAlto[posLeiturasPeriodicas] = ValAlto[posLeiturasPeriodicas].toFixed(NumCasasDecimais[posLeiturasPeriodicas]);\n        ValMuitoAlto[posLeiturasPeriodicas] = ValMuitoAlto[posLeiturasPeriodicas].toFixed(NumCasasDecimais[posLeiturasPeriodicas]);\n\n        if (CodAreaProcesso[posLeiturasPeriodicas] == CodAreaProcessoAPF[posLeiturasPeriodicas]) \n        {\n            TipFuncionando[posLeiturasPeriodicas] = true;\n        }\n\n        json.push({\n            \"CodVariavelLeitura\": CodVariavelLeitura[posLeiturasPeriodicas],\n            \"ValMuitoBaixo\": ValMuitoBaixo[posLeiturasPeriodicas],\n            \"ValBaixo\": ValBaixo[posLeiturasPeriodicas],\n            \"ValVariavelLeitura\": leitura,\n            \"ValVariavelLeituraString\": null,\n            \"ValAlto\": ValAlto[posLeiturasPeriodicas],\n            \"ValMuitoAlto\": ValMuitoAlto[posLeiturasPeriodicas],\n            \"TipFuncionando\": TipFuncionando[posLeiturasPeriodicas],\n            \"DataVariavelLeitura\": DataVariavelLeituraDiaNova,\n            \"TipMonitoracaoPeriodico\": TipMonitoracaoPeriodico[posLeiturasPeriodicas]\n        });\n\n    } else if (TipVariavelLeitura[posLeiturasPeriodicas] == 3 || TipVariavelLeitura[posLeiturasPeriodicas] == 4) {\n        node.warn(leitura)\n        json.push({\n            \"CodVariavelLeitura\": CodVariavelLeitura[posLeiturasPeriodicas],\n            \"ValMuitoBaixo\": ValMuitoBaixo[posLeiturasPeriodicas],\n            \"ValBaixo\": ValBaixo[posLeiturasPeriodicas],\n            \"ValVariavelLeitura\": null,\n            \"ValVariavelLeituraString\": leitura,\n            \"ValAlto\": ValAlto[posLeiturasPeriodicas],\n            \"ValMuitoAlto\": ValMuitoAlto[posLeiturasPeriodicas],\n            \"TipFuncionando\": TipFuncionando[posLeiturasPeriodicas],\n            \"DataVariavelLeituraDia\": DataVariavelLeituraDiaNova,\n            \"TipMonitoracaoPeriodico\": TipMonitoracaoPeriodico[posLeiturasPeriodicas]\n        });\n    }\n}\n\nmsg.payload = json;\nif(msg.payload != \"\")\n{\n    escreveu = true\n    flow.set(\"escreveu\", escreveu);\n    flow.set(\"contador\", 0)\n    flow.set(\"leitura\", [])\n    node.warn(\"Periodicas Siemens 2\");\n    node.warn(new Date().getTime());\n    return msg;\n}",
+        "func": "let json = new Array();\n\nlet leitura = flow.get('leitura');\nlet TipConexao = global.get('TipConexaoVar');\nlet CodVariavelLeitura = global.get('CodVariavelLeituraVar');\nlet ValMuitoBaixo = global.get('ValMuitoBaixoVar');\nlet ValBaixo = global.get('ValBaixoVar');\nlet ValAlto = global.get('ValAltoVar');\nlet ValMuitoAlto = global.get('ValMuitoAltoVar');\nlet NumCasasDecimais = global.get('NumCasasDecimaisVar');\nlet ValEscala = global.get('ValEscalaVar');\nlet CodUnidadeEmpresa = global.get('CodUnidadeEmpresaVar');\nlet TipAlarmeDigital = global.get('TipAlarmeDigitalVar');\nlet TipVariavelLeitura = global.get('TipVariavelLeituraVar');\nlet TipMonitoracaoPeriodico = global.get('TipMonitoracaoPeriodicoVar');\n\nvar hora = flow.get('hora');\nvar data = msg.payload;\n\nconst DataAtualHoraNova = hora;\nconst DataVariavelLeituraHoraNova = hora;\nconst DataVariavelLeituraDiaNova = data;\n\nflow.set(\"DataVariavelLeituraHoraNova\", DataVariavelLeituraHoraNova);\nflow.set(\"DataVariavelLeituraDiaNova\", DataVariavelLeituraDiaNova);\nflow.set(\"DataAtualHoraNova\", DataAtualHoraNova);\n\nlet posLeiturasPeriodicas = flow.get('posLeiturasPeriodicas');\n\nlet TipFuncionando = global.get('TipFuncionandoVar');\nlet CodAreaProcessoAPF = global.get('CodAreaProcessoAPF');\nlet CodAreaProcesso = global.get('CodAreaProcessoVar');\n\nlet escreveu = false;\n\nif (posLeiturasPeriodicas != null && msg.payload != null)\n{   \n    if (TipVariavelLeitura[posLeiturasPeriodicas] == 1 || TipVariavelLeitura[posLeiturasPeriodicas] == 2)\n    {\n        leitura = leitura.toFixed(NumCasasDecimais[posLeiturasPeriodicas]);\n\n        ValMuitoBaixo[posLeiturasPeriodicas] = ValMuitoBaixo[posLeiturasPeriodicas].toFixed(NumCasasDecimais[posLeiturasPeriodicas]);\n        ValBaixo[posLeiturasPeriodicas] = ValBaixo[posLeiturasPeriodicas].toFixed(NumCasasDecimais[posLeiturasPeriodicas]);\n        ValAlto[posLeiturasPeriodicas] = ValAlto[posLeiturasPeriodicas].toFixed(NumCasasDecimais[posLeiturasPeriodicas]);\n        ValMuitoAlto[posLeiturasPeriodicas] = ValMuitoAlto[posLeiturasPeriodicas].toFixed(NumCasasDecimais[posLeiturasPeriodicas]);\n\n        if (CodAreaProcesso[posLeiturasPeriodicas] == CodAreaProcessoAPF[posLeiturasPeriodicas]) \n        {\n            TipFuncionando[posLeiturasPeriodicas] = true;\n        }\n\n        json = {\n            \"CodVariavelLeitura\": CodVariavelLeitura[posLeiturasPeriodicas],\n            \"ValMuitoBaixo\": ValMuitoBaixo[posLeiturasPeriodicas],\n            \"ValBaixo\": ValBaixo[posLeiturasPeriodicas],\n            \"ValVariavelLeitura\": leitura,\n            \"ValVariavelLeituraString\": null,\n            \"ValAlto\": ValAlto[posLeiturasPeriodicas],\n            \"ValMuitoAlto\": ValMuitoAlto[posLeiturasPeriodicas],\n            \"TipFuncionando\": TipFuncionando[posLeiturasPeriodicas],\n            \"DataVariavelLeitura\": DataVariavelLeituraDiaNova,\n            \"TipMonitoracaoPeriodico\": TipMonitoracaoPeriodico[posLeiturasPeriodicas]\n        };\n\n    } else if (TipVariavelLeitura[posLeiturasPeriodicas] == 3 || TipVariavelLeitura[posLeiturasPeriodicas] == 4) {\n        node.warn(leitura)\n        json = {\n            \"CodVariavelLeitura\": CodVariavelLeitura[posLeiturasPeriodicas],\n            \"ValMuitoBaixo\": ValMuitoBaixo[posLeiturasPeriodicas],\n            \"ValBaixo\": ValBaixo[posLeiturasPeriodicas],\n            \"ValVariavelLeitura\": null,\n            \"ValVariavelLeituraString\": leitura,\n            \"ValAlto\": ValAlto[posLeiturasPeriodicas],\n            \"ValMuitoAlto\": ValMuitoAlto[posLeiturasPeriodicas],\n            \"TipFuncionando\": TipFuncionando[posLeiturasPeriodicas],\n            \"DataVariavelLeituraDia\": DataVariavelLeituraDiaNova,\n            \"TipMonitoracaoPeriodico\": TipMonitoracaoPeriodico[posLeiturasPeriodicas]\n        }\n    }\n}\n\nmsg.payload = JSON.stringify(json)+\",\";\nif(msg.payload != \"\")\n{\n    escreveu = true\n    flow.set(\"escreveu\", escreveu);\n    flow.set(\"contador\", 0)\n    flow.set(\"leitura\", [])\n    node.warn(\"Periodicas Siemens 2\");\n    node.warn(new Date().getTime());\n    return msg;\n}",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
         "x": 190,
-        "y": 1020,
-        "wires": [
-            [
-                "4ef832cf65245df6"
-            ]
-        ]
-    },
-    {
-        "id": "4ef832cf65245df6",
-        "type": "json",
-        "z": "790c4063f20b5b89",
-        "name": "",
-        "property": "payload",
-        "action": "",
-        "pretty": true,
-        "x": 350,
         "y": 980,
         "wires": [
             [
@@ -2186,14 +2128,14 @@
         "type": "file",
         "z": "790c4063f20b5b89",
         "name": "Escreve o arquivo",
-        "filename": "/home/nexxus/Documentos/ArquivosJSON/variavelLeituraPeriodicaValor.json",
+        "filename": "/home/nexxus/Documentos/ArquivosJSON/periodica.json",
         "filenameType": "str",
-        "appendNewline": true,
+        "appendNewline": false,
         "createDir": true,
         "overwriteFile": "false",
         "encoding": "none",
-        "x": 490,
-        "y": 1020,
+        "x": 410,
+        "y": 980,
         "wires": [
             []
         ]
@@ -2210,7 +2152,7 @@
         "finalize": "",
         "libs": [],
         "x": 125,
-        "y": 1060,
+        "y": 1020,
         "wires": [
             [
                 "270a09877b7b16cf"
@@ -2236,7 +2178,7 @@
         "allowrate": false,
         "outputs": 1,
         "x": 85,
-        "y": 1060,
+        "y": 1020,
         "wires": [
             [
                 "40e29f9ae9d5bcd7"
@@ -2257,7 +2199,7 @@
         "oldrc": false,
         "name": "exec bash escreve.sh",
         "x": 840,
-        "y": 1060,
+        "y": 1020,
         "wires": [
             [],
             [],
@@ -2276,7 +2218,7 @@
         "finalize": "",
         "libs": [],
         "x": 220,
-        "y": 1060,
+        "y": 1020,
         "wires": [
             [
                 "c475e835b889adb1"
@@ -2295,7 +2237,7 @@
         "stream": false,
         "addname": "",
         "x": 359,
-        "y": 1060,
+        "y": 1020,
         "wires": [
             [
                 "dadfb4c316e170c6"
@@ -2320,7 +2262,7 @@
         "allowrate": true,
         "outputs": 1,
         "x": 479,
-        "y": 1060,
+        "y": 1020,
         "wires": [
             [
                 "6b3fdd69a7551744"
@@ -2339,7 +2281,7 @@
         "overwriteFile": "true",
         "encoding": "none",
         "x": 619,
-        "y": 1060,
+        "y": 1020,
         "wires": [
             [
                 "0e5757a5fb4b4147"
@@ -2358,7 +2300,7 @@
         "finalize": "",
         "libs": [],
         "x": 714,
-        "y": 1060,
+        "y": 1020,
         "wires": [
             [
                 "72950f3624ba691c"
@@ -2375,7 +2317,7 @@
             "38a4d5eb3f7e1646"
         ],
         "x": 55,
-        "y": 1020,
+        "y": 980,
         "wires": [
             [
                 "41137ffc17c9f940",
@@ -2474,6 +2416,22 @@
         "info": "",
         "x": 120,
         "y": 40,
+        "wires": []
+    },
+    {
+        "id": "0c5f0586eafd8f4e",
+        "type": "debug",
+        "z": "790c4063f20b5b89",
+        "name": "debug 1",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 580,
+        "y": 660,
         "wires": []
     },
     {
@@ -2700,29 +2658,13 @@
         "type": "function",
         "z": "95a58997dc14a3e1",
         "name": "Modifica o payload saida",
-        "func": "let json = new Array();\n\nlet leitura2 = flow.get('leitura2');\nlet TipConexao = global.get('TipConexaoVar');\nlet CodVariavelLeitura = global.get('CodVariavelLeituraVar');\nlet ValMuitoBaixo = global.get('ValMuitoBaixoVar');\nlet ValBaixo = global.get('ValBaixoVar');\nlet ValAlto = global.get('ValAltoVar');\nlet ValMuitoAlto = global.get('ValMuitoAltoVar');\nlet NumCasasDecimais = global.get('NumCasasDecimaisVar');\nlet ValEscala = global.get('ValEscalaVar');\nlet CodUnidadeEmpresa = global.get('CodUnidadeEmpresaVar');\nlet TipAlarmeDigital = global.get('TipAlarmeDigitalVar');\nlet TipVariavelLeitura = global.get('TipVariavelLeituraVar');\nlet TipMonitoracaoPeriodico = global.get('TipMonitoracaoPeriodicoVar');\nlet posEventosLeitura = flow.get('posEventosLeitura');\n\nvar hora = flow.get('hora2');\nvar data = msg.payload;\n\nconst DataAtualHoraNova = hora;\nconst DataVariavelLeituraHoraNova = hora;\nconst DataVariavelLeituraDiaNova = data;\n\nflow.set(\"DataVariavelLeituraHoraNova2\", DataVariavelLeituraHoraNova);\nflow.set(\"DataVariavelLeituraDiaNova2\", DataVariavelLeituraDiaNova);\nflow.set(\"DataAtualHoraNova2\", DataAtualHoraNova);\n\nlet TipFuncionando = global.get('TipFuncionandoVar');\nlet CodAreaProcessoAPF = global.get('CodAreaProcessoAPF');\nlet CodAreaProcesso = global.get('CodAreaProcessoVar');\n\nlet escreveu2 = false;\n\nif(posEventosLeitura != null && msg.payload != null)\n{\n    for(let key in posEventosLeitura)\n    {\n        if(TipVariavelLeitura[posEventosLeitura[key]] == 1 || TipVariavelLeitura[posEventosLeitura[key]] == 2)\n        {\n            if(leitura2.length > 1)\n            {\n                for(let pos in leitura2)\n                {\n                    leitura2[pos] = leitura2[pos].toFixed(NumCasasDecimais[posEventosLeitura[key]]);\n                }\n            } else\n            {\n                leitura2 = leitura2[0].toFixed(NumCasasDecimais[posEventosLeitura[key]]);\n            }\n\n            ValMuitoBaixo[posEventosLeitura[key]] = ValMuitoBaixo[posEventosLeitura[key]].toFixed(NumCasasDecimais[posEventosLeitura[key]]);\n            ValBaixo[posEventosLeitura[key]] = ValBaixo[posEventosLeitura[key]].toFixed(NumCasasDecimais[posEventosLeitura[key]]);\n            ValAlto[posEventosLeitura[key]] = ValAlto[posEventosLeitura[key]].toFixed(NumCasasDecimais[posEventosLeitura[key]]);\n            ValMuitoAlto[posEventosLeitura[key]] = ValMuitoAlto[posEventosLeitura[key]].toFixed(NumCasasDecimais[posEventosLeitura[key]]);\n\n            if (CodAreaProcesso[posEventosLeitura[key]] == CodAreaProcessoAPF[posEventosLeitura[key]]) {\n                TipFuncionando[posEventosLeitura[key]] = true\n            }\n            \n            json.push({\n                \"CodVariavelLeitura\": CodVariavelLeitura[posEventosLeitura[key]],\n                \"ValMuitoBaixo\": ValMuitoBaixo[posEventosLeitura[key]],\n                \"ValBaixo\": ValBaixo[posEventosLeitura[key]],\n                \"ValVariavelLeitura\": leitura2,\n                \"ValVariavelLeituraString\": null,\n                \"ValAlto\": ValAlto[posEventosLeitura[key]],\n                \"ValMuitoAlto\": ValMuitoAlto[posEventosLeitura[key]],\n                \"TipFuncionando\": TipFuncionando[posEventosLeitura[key]],\n                \"DataVariavelLeitura\": DataVariavelLeituraDiaNova,\n                \"TipMonitoracaoPeriodico\": TipMonitoracaoPeriodico[posEventosLeitura[key]]\n            });\n        } else if(TipVariavelLeitura[posEventosLeitura[key]] == 3 || TipVariavelLeitura[posEventosLeitura[key]] == 4) \n        {\n            if(leitura2.length == 1)\n            {\n                json.push({\n                    \"CodVariavelLeitura\": CodVariavelLeitura[posEventosLeitura[key]],\n                    \"ValMuitoBaixo\": ValMuitoBaixo[posEventosLeitura[key]],\n                    \"ValBaixo\": ValBaixo[posEventosLeitura[key]],\n                    \"ValVariavelLeitura\": null,\n                    \"ValVariavelLeituraString\": leitura2[0],\n                    \"ValAlto\": ValAlto[posEventosLeitura[key]],\n                    \"ValMuitoAlto\": ValMuitoAlto[posEventosLeitura[key]],\n                    \"TipFuncionando\": TipFuncionando[posEventosLeitura[key]],\n                    \"DataVariavelLeituraDia\": DataVariavelLeituraDiaNova,\n                    \"TipMonitoracaoPeriodico\": TipMonitoracaoPeriodico[posEventosLeitura[key]]\n                });\n            } \n            else if(leitura2.length > 1)\n            {\n                json.push({\n                    \"CodVariavelLeitura\": CodVariavelLeitura[posEventosLeitura[key]],\n                    \"ValMuitoBaixo\": ValMuitoBaixo[posEventosLeitura[key]],\n                    \"ValBaixo\": ValBaixo[posEventosLeitura[key]],\n                    \"ValVariavelLeitura\": null,\n                    \"ValVariavelLeituraString\": leitura2,\n                    \"ValAlto\": ValAlto[posEventosLeitura[key]],\n                    \"ValMuitoAlto\": ValMuitoAlto[posEventosLeitura[key]],\n                    \"TipFuncionando\": TipFuncionando[posEventosLeitura[key]],\n                    \"DataVariavelLeituraDia\": DataVariavelLeituraDiaNova,\n                    \"TipMonitoracaoPeriodico\": TipMonitoracaoPeriodico[posEventosLeitura[key]]\n                });\n            }\n        }\n    }\n}\n\nmsg.payload = json\nif(msg.payload != \"\"){\n    escreveu2 = true\n    flow.set(\"escreveu2\", escreveu2)\n    //node.warn(\"Eventos 2\");\n    //node.warn(new Date().getTime());\n    return msg\n}",
+        "func": "let json = new Array();\n\nlet leitura2 = flow.get('leitura2');\nlet TipConexao = global.get('TipConexaoVar');\nlet CodVariavelLeitura = global.get('CodVariavelLeituraVar');\nlet ValMuitoBaixo = global.get('ValMuitoBaixoVar');\nlet ValBaixo = global.get('ValBaixoVar');\nlet ValAlto = global.get('ValAltoVar');\nlet ValMuitoAlto = global.get('ValMuitoAltoVar');\nlet NumCasasDecimais = global.get('NumCasasDecimaisVar');\nlet ValEscala = global.get('ValEscalaVar');\nlet CodUnidadeEmpresa = global.get('CodUnidadeEmpresaVar');\nlet TipAlarmeDigital = global.get('TipAlarmeDigitalVar');\nlet TipVariavelLeitura = global.get('TipVariavelLeituraVar');\nlet TipMonitoracaoPeriodico = global.get('TipMonitoracaoPeriodicoVar');\nlet posEventosLeitura = flow.get('posEventosLeitura');\n\nvar hora = flow.get('hora2');\nvar data = msg.payload;\n\nconst DataAtualHoraNova = hora;\nconst DataVariavelLeituraHoraNova = hora;\nconst DataVariavelLeituraDiaNova = data;\n\nflow.set(\"DataVariavelLeituraHoraNova2\", DataVariavelLeituraHoraNova);\nflow.set(\"DataVariavelLeituraDiaNova2\", DataVariavelLeituraDiaNova);\nflow.set(\"DataAtualHoraNova2\", DataAtualHoraNova);\n\nlet TipFuncionando = global.get('TipFuncionandoVar');\nlet CodAreaProcessoAPF = global.get('CodAreaProcessoAPF');\nlet CodAreaProcesso = global.get('CodAreaProcessoVar');\n\nlet escreveu2 = false;\n\nif(posEventosLeitura != null && msg.payload != null)\n{\n    for(let key in posEventosLeitura)\n    {\n        if(TipVariavelLeitura[posEventosLeitura[key]] == 1 || TipVariavelLeitura[posEventosLeitura[key]] == 2)\n        {\n            if(leitura2.length > 1)\n            {\n                for(let pos in leitura2)\n                {\n                    leitura2[pos] = leitura2[pos].toFixed(NumCasasDecimais[posEventosLeitura[key]]);\n                }\n            } else\n            {\n                leitura2 = leitura2[0].toFixed(NumCasasDecimais[posEventosLeitura[key]]);\n            }\n\n            ValMuitoBaixo[posEventosLeitura[key]] = ValMuitoBaixo[posEventosLeitura[key]].toFixed(NumCasasDecimais[posEventosLeitura[key]]);\n            ValBaixo[posEventosLeitura[key]] = ValBaixo[posEventosLeitura[key]].toFixed(NumCasasDecimais[posEventosLeitura[key]]);\n            ValAlto[posEventosLeitura[key]] = ValAlto[posEventosLeitura[key]].toFixed(NumCasasDecimais[posEventosLeitura[key]]);\n            ValMuitoAlto[posEventosLeitura[key]] = ValMuitoAlto[posEventosLeitura[key]].toFixed(NumCasasDecimais[posEventosLeitura[key]]);\n\n            if (CodAreaProcesso[posEventosLeitura[key]] == CodAreaProcessoAPF[posEventosLeitura[key]]) {\n                TipFuncionando[posEventosLeitura[key]] = true\n            }\n            \n            json = {\n                \"CodVariavelLeitura\": CodVariavelLeitura[posEventosLeitura[key]],\n                \"ValMuitoBaixo\": ValMuitoBaixo[posEventosLeitura[key]],\n                \"ValBaixo\": ValBaixo[posEventosLeitura[key]],\n                \"ValVariavelLeitura\": leitura2,\n                \"ValVariavelLeituraString\": null,\n                \"ValAlto\": ValAlto[posEventosLeitura[key]],\n                \"ValMuitoAlto\": ValMuitoAlto[posEventosLeitura[key]],\n                \"TipFuncionando\": TipFuncionando[posEventosLeitura[key]],\n                \"DataVariavelLeitura\": DataVariavelLeituraDiaNova,\n                \"TipMonitoracaoPeriodico\": TipMonitoracaoPeriodico[posEventosLeitura[key]]\n            };\n        } else if(TipVariavelLeitura[posEventosLeitura[key]] == 3 || TipVariavelLeitura[posEventosLeitura[key]] == 4) \n        {\n            if(leitura2.length == 1)\n            {\n                json = {\n                    \"CodVariavelLeitura\": CodVariavelLeitura[posEventosLeitura[key]],\n                    \"ValMuitoBaixo\": ValMuitoBaixo[posEventosLeitura[key]],\n                    \"ValBaixo\": ValBaixo[posEventosLeitura[key]],\n                    \"ValVariavelLeitura\": null,\n                    \"ValVariavelLeituraString\": leitura2[0],\n                    \"ValAlto\": ValAlto[posEventosLeitura[key]],\n                    \"ValMuitoAlto\": ValMuitoAlto[posEventosLeitura[key]],\n                    \"TipFuncionando\": TipFuncionando[posEventosLeitura[key]],\n                    \"DataVariavelLeituraDia\": DataVariavelLeituraDiaNova,\n                    \"TipMonitoracaoPeriodico\": TipMonitoracaoPeriodico[posEventosLeitura[key]]\n                };\n            } \n            else if(leitura2.length > 1)\n            {\n                json = {\n                    \"CodVariavelLeitura\": CodVariavelLeitura[posEventosLeitura[key]],\n                    \"ValMuitoBaixo\": ValMuitoBaixo[posEventosLeitura[key]],\n                    \"ValBaixo\": ValBaixo[posEventosLeitura[key]],\n                    \"ValVariavelLeitura\": null,\n                    \"ValVariavelLeituraString\": leitura2,\n                    \"ValAlto\": ValAlto[posEventosLeitura[key]],\n                    \"ValMuitoAlto\": ValMuitoAlto[posEventosLeitura[key]],\n                    \"TipFuncionando\": TipFuncionando[posEventosLeitura[key]],\n                    \"DataVariavelLeituraDia\": DataVariavelLeituraDiaNova,\n                    \"TipMonitoracaoPeriodico\": TipMonitoracaoPeriodico[posEventosLeitura[key]]\n                };\n            }\n        }\n    }\n}\n\nmsg.payload = JSON.stringify(json) + \",\";\nif(msg.payload != \"\"){\n    escreveu2 = true\n    flow.set(\"escreveu2\", escreveu2)\n    //node.warn(\"Eventos 2\");\n    //node.warn(new Date().getTime());\n    return msg\n}",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
         "x": 190,
-        "y": 560,
-        "wires": [
-            [
-                "f9dfa9c4bfbfce90"
-            ]
-        ]
-    },
-    {
-        "id": "f9dfa9c4bfbfce90",
-        "type": "json",
-        "z": "95a58997dc14a3e1",
-        "name": "",
-        "property": "payload",
-        "action": "",
-        "pretty": true,
-        "x": 350,
         "y": 520,
         "wires": [
             [
@@ -2735,14 +2677,14 @@
         "type": "file",
         "z": "95a58997dc14a3e1",
         "name": "Escreve o arquivo",
-        "filename": "/home/nexxus/Documentos/ArquivosJSON/variavelLeituraValor.json",
+        "filename": "/home/nexxus/Documentos/ArquivosJSON/evento.json",
         "filenameType": "str",
         "appendNewline": true,
         "createDir": true,
         "overwriteFile": "false",
         "encoding": "none",
-        "x": 490,
-        "y": 560,
+        "x": 410,
+        "y": 520,
         "wires": [
             []
         ]
@@ -2759,7 +2701,7 @@
         "finalize": "",
         "libs": [],
         "x": 210,
-        "y": 600,
+        "y": 560,
         "wires": [
             [
                 "786f1c91afde403a"
@@ -2778,7 +2720,7 @@
         "overwriteFile": "true",
         "encoding": "none",
         "x": 599.9999942779541,
-        "y": 600,
+        "y": 560,
         "wires": [
             [
                 "c4b9616d06934e9c"
@@ -2798,7 +2740,7 @@
         "oldrc": false,
         "name": "exec bash editaVal.sh",
         "x": 779.9999904632568,
-        "y": 600,
+        "y": 560,
         "wires": [
             [],
             [],
@@ -2817,7 +2759,7 @@
         "stream": false,
         "addname": "",
         "x": 339.9999942779541,
-        "y": 600.0000305175781,
+        "y": 560.0000305175781,
         "wires": [
             [
                 "1ca1dad7e698aeb5"
@@ -2842,7 +2784,7 @@
         "allowrate": true,
         "outputs": 1,
         "x": 460,
-        "y": 600,
+        "y": 560,
         "wires": [
             [
                 "19d0427adae5a947"
@@ -2861,7 +2803,7 @@
         "finalize": "",
         "libs": [],
         "x": 115,
-        "y": 600,
+        "y": 560,
         "wires": [
             [
                 "7683d72b409c2326"
@@ -2887,7 +2829,7 @@
         "allowrate": false,
         "outputs": 1,
         "x": 75,
-        "y": 600,
+        "y": 560,
         "wires": [
             [
                 "19b9d076541a1007"
@@ -2904,7 +2846,7 @@
             "191e948addf9ac3f"
         ],
         "x": 55,
-        "y": 560,
+        "y": 520,
         "wires": [
             [
                 "4b4dbdec752c8df4",
@@ -3054,7 +2996,7 @@
         "name": "Compara em sequencia as datas das variaveis",
         "info": "",
         "x": 220,
-        "y": 700,
+        "y": 660,
         "wires": []
     },
     {
@@ -3064,7 +3006,7 @@
         "name": "PERIODICAS",
         "info": "",
         "x": 110,
-        "y": 660,
+        "y": 620,
         "wires": []
     },
     {
@@ -3089,7 +3031,7 @@
         "payload": "",
         "payloadType": "date",
         "x": 130,
-        "y": 760,
+        "y": 720,
         "wires": [
             [
                 "5deb912719134c09"
@@ -3108,7 +3050,7 @@
         "finalize": "",
         "libs": [],
         "x": 330,
-        "y": 760,
+        "y": 720,
         "wires": [
             [
                 "1ae2c8a5bbd98455"
@@ -3127,7 +3069,7 @@
         "stream": false,
         "addname": "",
         "x": 475,
-        "y": 760,
+        "y": 720,
         "wires": [
             [
                 "ae521623974533ea"
@@ -3147,7 +3089,7 @@
         "finalize": "",
         "libs": [],
         "x": 640,
-        "y": 760,
+        "y": 720,
         "wires": [
             [
                 "37c709f2b228d6c7"
@@ -3172,7 +3114,7 @@
         "allowrate": false,
         "outputs": 1,
         "x": 515,
-        "y": 760,
+        "y": 720,
         "wires": [
             [
                 "3d45909eb7980e8a"
@@ -3192,7 +3134,7 @@
         "finalize": "",
         "libs": [],
         "x": 800,
-        "y": 760,
+        "y": 720,
         "wires": [
             [
                 "9ebb1c0b7296f1d9"
@@ -3211,7 +3153,7 @@
         "finalize": "",
         "libs": [],
         "x": 380,
-        "y": 920,
+        "y": 880,
         "wires": [
             [
                 "2a505949eff91fa3"
@@ -3236,7 +3178,7 @@
         "outputType": "msg",
         "outTz": "America/Sao_Paulo",
         "x": 520,
-        "y": 880,
+        "y": 840,
         "wires": [
             [
                 "ba6f6e9c69cb7b7b"
@@ -3250,7 +3192,7 @@
         "name": "Escreve o arquivo de sai­da e modifica o arquivo dadosIniciais.json",
         "info": "",
         "x": 280,
-        "y": 820,
+        "y": 780,
         "wires": []
     },
     {
@@ -3259,7 +3201,7 @@
         "z": "95a58997dc14a3e1",
         "name": "dadosIniciaisVariaveis.json",
         "x": 200,
-        "y": 880,
+        "y": 840,
         "wires": [
             [
                 "a8bf9cdf660eb07d"
@@ -3276,7 +3218,7 @@
             "91ef9b20d465fcc1"
         ],
         "x": 605,
-        "y": 880,
+        "y": 840,
         "wires": []
     },
     {
@@ -3284,30 +3226,14 @@
         "type": "function",
         "z": "95a58997dc14a3e1",
         "name": "Modifica o payload saida",
-        "func": "let json = new Array();\n\nlet leitura = flow.get('leitura');\nlet TipConexao = global.get('TipConexaoVar');\nlet CodVariavelLeitura = global.get('CodVariavelLeituraVar');\nlet ValMuitoBaixo = global.get('ValMuitoBaixoVar');\nlet ValBaixo = global.get('ValBaixoVar');\nlet ValAlto = global.get('ValAltoVar');\nlet ValMuitoAlto = global.get('ValMuitoAltoVar');\nlet NumCasasDecimais = global.get('NumCasasDecimaisVar');\nlet ValEscala = global.get('ValEscalaVar');\nlet CodUnidadeEmpresa = global.get('CodUnidadeEmpresaVar');\nlet TipAlarmeDigital = global.get('TipAlarmeDigitalVar');\nlet TipVariavelLeitura = global.get('TipVariavelLeituraVar');\nlet TipMonitoracaoPeriodico = global.get('TipMonitoracaoPeriodicoVar');\n\nvar hora = flow.get('hora');\nvar data = msg.payload;\n\nconst DataAtualHoraNova = hora;\nconst DataVariavelLeituraHoraNova = hora;\nconst DataVariavelLeituraDiaNova = data;\n\nflow.set(\"DataVariavelLeituraHoraNova\", DataVariavelLeituraHoraNova);\nflow.set(\"DataVariavelLeituraDiaNova\", DataVariavelLeituraDiaNova);\nflow.set(\"DataAtualHoraNova\", DataAtualHoraNova);\n\nlet posLeiturasPeriodicas = flow.get('posLeiturasPeriodicas');\n\nlet TipFuncionando = global.get('TipFuncionandoVar');\nlet CodAreaProcessoAPF = global.get('CodAreaProcessoAPF');\nlet CodAreaProcesso = global.get('CodAreaProcessoVar');\n\nlet escreveu = false;\n\nif (posLeiturasPeriodicas != null && msg.payload != null)\n{   \n    if (TipVariavelLeitura[posLeiturasPeriodicas] == 1 || TipVariavelLeitura[posLeiturasPeriodicas] == 2)\n    {\n        leitura = leitura.toFixed(NumCasasDecimais[posLeiturasPeriodicas]);\n\n        ValMuitoBaixo[posLeiturasPeriodicas] = ValMuitoBaixo[posLeiturasPeriodicas].toFixed(NumCasasDecimais[posLeiturasPeriodicas]);\n        ValBaixo[posLeiturasPeriodicas] = ValBaixo[posLeiturasPeriodicas].toFixed(NumCasasDecimais[posLeiturasPeriodicas]);\n        ValAlto[posLeiturasPeriodicas] = ValAlto[posLeiturasPeriodicas].toFixed(NumCasasDecimais[posLeiturasPeriodicas]);\n        ValMuitoAlto[posLeiturasPeriodicas] = ValMuitoAlto[posLeiturasPeriodicas].toFixed(NumCasasDecimais[posLeiturasPeriodicas]);\n\n        if (CodAreaProcesso[posLeiturasPeriodicas] == CodAreaProcessoAPF[posLeiturasPeriodicas]) \n        {\n            TipFuncionando[posLeiturasPeriodicas] = true;\n        }\n\n        json.push({\n            \"CodVariavelLeitura\": CodVariavelLeitura[posLeiturasPeriodicas],\n            \"ValMuitoBaixo\": ValMuitoBaixo[posLeiturasPeriodicas],\n            \"ValBaixo\": ValBaixo[posLeiturasPeriodicas],\n            \"ValVariavelLeitura\": leitura,\n            \"ValVariavelLeituraString\": null,\n            \"ValAlto\": ValAlto[posLeiturasPeriodicas],\n            \"ValMuitoAlto\": ValMuitoAlto[posLeiturasPeriodicas],\n            \"TipFuncionando\": TipFuncionando[posLeiturasPeriodicas],\n            \"DataVariavelLeitura\": DataVariavelLeituraDiaNova,\n            \"TipMonitoracaoPeriodico\": TipMonitoracaoPeriodico[posLeiturasPeriodicas]\n        });\n\n    } else if (TipVariavelLeitura[posLeiturasPeriodicas] == 3 || TipVariavelLeitura[posLeiturasPeriodicas] == 4) {\n        node.warn(leitura)\n        json.push({\n            \"CodVariavelLeitura\": CodVariavelLeitura[posLeiturasPeriodicas],\n            \"ValMuitoBaixo\": ValMuitoBaixo[posLeiturasPeriodicas],\n            \"ValBaixo\": ValBaixo[posLeiturasPeriodicas],\n            \"ValVariavelLeitura\": null,\n            \"ValVariavelLeituraString\": leitura,\n            \"ValAlto\": ValAlto[posLeiturasPeriodicas],\n            \"ValMuitoAlto\": ValMuitoAlto[posLeiturasPeriodicas],\n            \"TipFuncionando\": TipFuncionando[posLeiturasPeriodicas],\n            \"DataVariavelLeituraDia\": DataVariavelLeituraDiaNova,\n            \"TipMonitoracaoPeriodico\": TipMonitoracaoPeriodico[posLeiturasPeriodicas]\n        });\n    }\n}\n\nmsg.payload = json;\nif(msg.payload != \"\")\n{\n    escreveu = true\n    flow.set(\"escreveu\", escreveu);\n    flow.set(\"contador\", 0)\n    flow.set(\"leitura\", [])\n    node.warn(\"Periodicas Rockwell 2\");\n    node.warn(new Date().getTime());\n    return msg;\n}",
+        "func": "let json = new Array();\n\nlet leitura = flow.get('leitura');\nlet TipConexao = global.get('TipConexaoVar');\nlet CodVariavelLeitura = global.get('CodVariavelLeituraVar');\nlet ValMuitoBaixo = global.get('ValMuitoBaixoVar');\nlet ValBaixo = global.get('ValBaixoVar');\nlet ValAlto = global.get('ValAltoVar');\nlet ValMuitoAlto = global.get('ValMuitoAltoVar');\nlet NumCasasDecimais = global.get('NumCasasDecimaisVar');\nlet ValEscala = global.get('ValEscalaVar');\nlet CodUnidadeEmpresa = global.get('CodUnidadeEmpresaVar');\nlet TipAlarmeDigital = global.get('TipAlarmeDigitalVar');\nlet TipVariavelLeitura = global.get('TipVariavelLeituraVar');\nlet TipMonitoracaoPeriodico = global.get('TipMonitoracaoPeriodicoVar');\n\nvar hora = flow.get('hora');\nvar data = msg.payload;\n\nconst DataAtualHoraNova = hora;\nconst DataVariavelLeituraHoraNova = hora;\nconst DataVariavelLeituraDiaNova = data;\n\nflow.set(\"DataVariavelLeituraHoraNova\", DataVariavelLeituraHoraNova);\nflow.set(\"DataVariavelLeituraDiaNova\", DataVariavelLeituraDiaNova);\nflow.set(\"DataAtualHoraNova\", DataAtualHoraNova);\n\nlet posLeiturasPeriodicas = flow.get('posLeiturasPeriodicas');\n\nlet TipFuncionando = global.get('TipFuncionandoVar');\nlet CodAreaProcessoAPF = global.get('CodAreaProcessoAPF');\nlet CodAreaProcesso = global.get('CodAreaProcessoVar');\n\nlet escreveu = false;\n\nif (posLeiturasPeriodicas != null && msg.payload != null)\n{   \n    if (TipVariavelLeitura[posLeiturasPeriodicas] == 1 || TipVariavelLeitura[posLeiturasPeriodicas] == 2)\n    {\n        leitura = leitura.toFixed(NumCasasDecimais[posLeiturasPeriodicas]);\n\n        ValMuitoBaixo[posLeiturasPeriodicas] = ValMuitoBaixo[posLeiturasPeriodicas].toFixed(NumCasasDecimais[posLeiturasPeriodicas]);\n        ValBaixo[posLeiturasPeriodicas] = ValBaixo[posLeiturasPeriodicas].toFixed(NumCasasDecimais[posLeiturasPeriodicas]);\n        ValAlto[posLeiturasPeriodicas] = ValAlto[posLeiturasPeriodicas].toFixed(NumCasasDecimais[posLeiturasPeriodicas]);\n        ValMuitoAlto[posLeiturasPeriodicas] = ValMuitoAlto[posLeiturasPeriodicas].toFixed(NumCasasDecimais[posLeiturasPeriodicas]);\n\n        if (CodAreaProcesso[posLeiturasPeriodicas] == CodAreaProcessoAPF[posLeiturasPeriodicas]) \n        {\n            TipFuncionando[posLeiturasPeriodicas] = true;\n        }\n\n        json = {\n            \"CodVariavelLeitura\": CodVariavelLeitura[posLeiturasPeriodicas],\n            \"ValMuitoBaixo\": ValMuitoBaixo[posLeiturasPeriodicas],\n            \"ValBaixo\": ValBaixo[posLeiturasPeriodicas],\n            \"ValVariavelLeitura\": leitura,\n            \"ValVariavelLeituraString\": null,\n            \"ValAlto\": ValAlto[posLeiturasPeriodicas],\n            \"ValMuitoAlto\": ValMuitoAlto[posLeiturasPeriodicas],\n            \"TipFuncionando\": TipFuncionando[posLeiturasPeriodicas],\n            \"DataVariavelLeitura\": DataVariavelLeituraDiaNova,\n            \"TipMonitoracaoPeriodico\": TipMonitoracaoPeriodico[posLeiturasPeriodicas]\n        };\n\n    } else if (TipVariavelLeitura[posLeiturasPeriodicas] == 3 || TipVariavelLeitura[posLeiturasPeriodicas] == 4) {\n        node.warn(leitura)\n        json = {\n            \"CodVariavelLeitura\": CodVariavelLeitura[posLeiturasPeriodicas],\n            \"ValMuitoBaixo\": ValMuitoBaixo[posLeiturasPeriodicas],\n            \"ValBaixo\": ValBaixo[posLeiturasPeriodicas],\n            \"ValVariavelLeitura\": null,\n            \"ValVariavelLeituraString\": leitura,\n            \"ValAlto\": ValAlto[posLeiturasPeriodicas],\n            \"ValMuitoAlto\": ValMuitoAlto[posLeiturasPeriodicas],\n            \"TipFuncionando\": TipFuncionando[posLeiturasPeriodicas],\n            \"DataVariavelLeituraDia\": DataVariavelLeituraDiaNova,\n            \"TipMonitoracaoPeriodico\": TipMonitoracaoPeriodico[posLeiturasPeriodicas]\n        };\n    }\n}\n\nmsg.payload = JSON.stringify(json)+\",\";\nif(msg.payload != \"\")\n{\n    escreveu = true\n    flow.set(\"escreveu\", escreveu);\n    flow.set(\"contador\", 0)\n    flow.set(\"leitura\", [])\n    node.warn(\"Periodicas Rockwell 2\");\n    node.warn(new Date().getTime());\n    return msg;\n}",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
         "x": 190,
-        "y": 1020,
-        "wires": [
-            [
-                "2575371f936c4e5c"
-            ]
-        ]
-    },
-    {
-        "id": "2575371f936c4e5c",
-        "type": "json",
-        "z": "95a58997dc14a3e1",
-        "name": "",
-        "property": "payload",
-        "action": "",
-        "pretty": true,
-        "x": 350,
-        "y": 980,
+        "y": 940,
         "wires": [
             [
                 "f2d3f60f51569d2a"
@@ -3319,14 +3245,14 @@
         "type": "file",
         "z": "95a58997dc14a3e1",
         "name": "Escreve o arquivo",
-        "filename": "/home/nexxus/Documentos/ArquivosJSON/variavelLeituraPeriodicaValor.json",
+        "filename": "/home/nexxus/Documentos/ArquivosJSON/periodica.json",
         "filenameType": "str",
-        "appendNewline": true,
+        "appendNewline": false,
         "createDir": true,
         "overwriteFile": "false",
         "encoding": "none",
-        "x": 490,
-        "y": 1020,
+        "x": 410,
+        "y": 940,
         "wires": [
             []
         ]
@@ -3343,7 +3269,7 @@
         "finalize": "",
         "libs": [],
         "x": 125,
-        "y": 1060,
+        "y": 980,
         "wires": [
             [
                 "4add4bf8ac098c09"
@@ -3369,7 +3295,7 @@
         "allowrate": false,
         "outputs": 1,
         "x": 85,
-        "y": 1060,
+        "y": 980,
         "wires": [
             [
                 "5c679a2c555ecf6b"
@@ -3390,7 +3316,7 @@
         "oldrc": false,
         "name": "exec bash escreve.sh",
         "x": 831,
-        "y": 1060,
+        "y": 980,
         "wires": [
             [],
             [],
@@ -3409,7 +3335,7 @@
         "finalize": "",
         "libs": [],
         "x": 220,
-        "y": 1060,
+        "y": 980,
         "wires": [
             [
                 "a3e3dbd732bbc89a"
@@ -3428,7 +3354,7 @@
         "stream": false,
         "addname": "",
         "x": 350,
-        "y": 1060,
+        "y": 980,
         "wires": [
             [
                 "a6b61781190d890b"
@@ -3453,7 +3379,7 @@
         "allowrate": true,
         "outputs": 1,
         "x": 470,
-        "y": 1060,
+        "y": 980,
         "wires": [
             [
                 "378d035bed6b7b65"
@@ -3472,7 +3398,7 @@
         "overwriteFile": "true",
         "encoding": "none",
         "x": 610,
-        "y": 1060,
+        "y": 980,
         "wires": [
             [
                 "410b5de0169a600a"
@@ -3491,7 +3417,7 @@
         "finalize": "",
         "libs": [],
         "x": 705,
-        "y": 1060,
+        "y": 980,
         "wires": [
             [
                 "dbd7956e7cf12626"
@@ -3508,7 +3434,7 @@
             "ba6f6e9c69cb7b7b"
         ],
         "x": 55,
-        "y": 1020,
+        "y": 940,
         "wires": [
             [
                 "2a7e1537de0e913f",
@@ -3525,7 +3451,7 @@
             "9ebb1c0b7296f1d9"
         ],
         "x": 55,
-        "y": 880,
+        "y": 840,
         "wires": [
             [
                 "3f231371519f21a8"
@@ -3542,7 +3468,7 @@
             "cd693a9c339a96cb"
         ],
         "x": 875,
-        "y": 760,
+        "y": 720,
         "wires": []
     },
     {
@@ -3754,6 +3680,224 @@
             [
                 "86e7c1d3b0f45ff3"
             ]
+        ]
+    },
+    {
+        "id": "57cffd5a2787e404",
+        "type": "file in",
+        "z": "bf25819c25bea22d",
+        "name": "periodica.json",
+        "filename": "/home/nexxus/Documentos/ArquivosJSON/periodica.json",
+        "filenameType": "str",
+        "format": "utf8",
+        "chunk": false,
+        "sendError": false,
+        "encoding": "none",
+        "allProps": false,
+        "x": 300,
+        "y": 340,
+        "wires": [
+            [
+                "d2024508958a348b",
+                "ab0953c0897e62bb"
+            ]
+        ]
+    },
+    {
+        "id": "1e19c7a08d28ba06",
+        "type": "inject",
+        "z": "bf25819c25bea22d",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "5",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 130,
+        "y": 340,
+        "wires": [
+            [
+                "57cffd5a2787e404"
+            ]
+        ]
+    },
+    {
+        "id": "d2024508958a348b",
+        "type": "function",
+        "z": "bf25819c25bea22d",
+        "name": "Formata saida",
+        "func": "const str = msg.payload.toString();\nconst message = \"[\" + str.slice(0, -1) + \"]\";\nmsg.payload = message;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 480,
+        "y": 340,
+        "wires": [
+            [
+                "891d7cb33d49d83a"
+            ]
+        ]
+    },
+    {
+        "id": "891d7cb33d49d83a",
+        "type": "file",
+        "z": "bf25819c25bea22d",
+        "name": "Escreve o arquivo",
+        "filename": "/home/nexxus/Documentos/ArquivosJSON/variavelLeituraPeriodicaValor.json",
+        "filenameType": "str",
+        "appendNewline": true,
+        "createDir": true,
+        "overwriteFile": "true",
+        "encoding": "none",
+        "x": 670,
+        "y": 340,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "73b2e07e234c077a",
+        "type": "comment",
+        "z": "bf25819c25bea22d",
+        "name": "Formata saida para varaivelLeituraPeriodicaValor.json e variavelLeituraValor.json",
+        "info": "",
+        "x": 300,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "ab0953c0897e62bb",
+        "type": "file",
+        "z": "bf25819c25bea22d",
+        "d": true,
+        "name": "Deleta o arquivo",
+        "filename": "/home/nexxus/Documentos/ArquivosJSON/periodica.json",
+        "filenameType": "str",
+        "appendNewline": true,
+        "createDir": true,
+        "overwriteFile": "delete",
+        "encoding": "none",
+        "x": 460,
+        "y": 380,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "5149284df46887b6",
+        "type": "file in",
+        "z": "bf25819c25bea22d",
+        "name": "evento.json",
+        "filename": "/home/nexxus/Documentos/ArquivosJSON/evento.json",
+        "filenameType": "str",
+        "format": "utf8",
+        "chunk": false,
+        "sendError": false,
+        "encoding": "none",
+        "allProps": false,
+        "x": 290,
+        "y": 440,
+        "wires": [
+            [
+                "d4ccbb69ab027892",
+                "453e4324f2881c8a"
+            ]
+        ]
+    },
+    {
+        "id": "9ad7076b8b72ee50",
+        "type": "inject",
+        "z": "bf25819c25bea22d",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "5",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 130,
+        "y": 440,
+        "wires": [
+            [
+                "5149284df46887b6"
+            ]
+        ]
+    },
+    {
+        "id": "d4ccbb69ab027892",
+        "type": "function",
+        "z": "bf25819c25bea22d",
+        "name": "Formata saida",
+        "func": "const str = msg.payload.toString();\nconst message = \"[\" + str.slice(0, -1) + \"]\";\nmsg.payload = message;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 460,
+        "y": 440,
+        "wires": [
+            [
+                "733689d002362446"
+            ]
+        ]
+    },
+    {
+        "id": "733689d002362446",
+        "type": "file",
+        "z": "bf25819c25bea22d",
+        "name": "Escreve o arquivo",
+        "filename": "/home/nexxus/Documentos/ArquivosJSON/variavelLeituraValor.json",
+        "filenameType": "str",
+        "appendNewline": true,
+        "createDir": true,
+        "overwriteFile": "true",
+        "encoding": "none",
+        "x": 650,
+        "y": 440,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "453e4324f2881c8a",
+        "type": "file",
+        "z": "bf25819c25bea22d",
+        "d": true,
+        "name": "Deleta o arquivo",
+        "filename": "/home/nexxus/Documentos/ArquivosJSON/periodica.json",
+        "filenameType": "str",
+        "appendNewline": true,
+        "createDir": true,
+        "overwriteFile": "delete",
+        "encoding": "none",
+        "x": 440,
+        "y": 480,
+        "wires": [
+            []
         ]
     }
 ]
